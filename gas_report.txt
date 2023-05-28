@@ -1,0 +1,45 @@
+| src/Pristine.sol:Pristine contract |                 |        |        |        |         |
+|------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                    | Deployment Size |        |        |        |         |
+| 822698                             | 4164            |        |        |        |         |
+| Function Name                      | min             | avg    | median | max    | # calls |
+| Positions                          | 914             | 914    | 914    | 914    | 10      |
+| Satoshi                            | 448             | 448    | 448    | 448    | 1       |
+| borrow                             | 77762           | 91247  | 94142  | 94142  | 7       |
+| checkPositionHealth                | 5484            | 5484   | 5484   | 5484   | 2       |
+| deposit                            | 6040            | 6040   | 6040   | 6040   | 2       |
+| getCollatPrice                     | 19357           | 19357  | 19357  | 19357  | 1       |
+| getPosition                        | 1103            | 1103   | 1103   | 1103   | 5       |
+| initSatoshi                        | 22705           | 22705  | 22705  | 22705  | 11      |
+| liquidatePosition                  | 5565            | 17065  | 15176  | 30456  | 3       |
+| open                               | 100881          | 105244 | 105681 | 105681 | 11      |
+| repay                              | 4469            | 4469   | 4469   | 4469   | 1       |
+| wBTC                               | 283             | 283    | 283    | 283    | 44      |
+| withdraw                           | 1919            | 14458  | 14458  | 26997  | 2       |
+
+
+| src/SatoshiERC20.sol:Satoshi contract |                 |        |        |        |         |
+|---------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                       | Deployment Size |        |        |        |         |
+| 794362                                | 4399            |        |        |        |         |
+| Function Name                         | min             | avg    | median | max    | # calls |
+| approve                               | 24647           | 24647  | 24647  | 24647  | 3       |
+| balanceOf                             | 585             | 1013   | 585    | 2585   | 14      |
+| burn                                  | 2386            | 2386   | 2386   | 2386   | 3       |
+| flashloan                             | 136282          | 136282 | 136282 | 136282 | 1       |
+| mint                                  | 46663           | 46663  | 46663  | 46663  | 7       |
+| transfer                              | 18392           | 20691  | 20691  | 22990  | 2       |
+| transferFrom                          | 22143           | 22143  | 22143  | 22143  | 1       |
+
+
+| test/SatoshiERC20.t.sol:FlashloanRecevier contract |                 |        |        |        |         |
+|----------------------------------------------------|-----------------|--------|--------|--------|---------|
+| Deployment Cost                                    | Deployment Size |        |        |        |         |
+| 590625                                             | 2982            |        |        |        |         |
+| Function Name                                      | min             | avg    | median | max    | # calls |
+| execute                                            | 111108          | 111108 | 111108 | 111108 | 1       |
+| flashloan                                          | 140047          | 140047 | 140047 | 140047 | 1       |
+| withdraw                                           | 19751           | 19751  | 19751  | 19751  | 1       |
+
+
+
