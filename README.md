@@ -1,6 +1,6 @@
 # Pristine - *CDP for bitcoin*
 
-The following is protocol similar to https://docs.liquity.org. So read those docs for more detail on how CDPs work.
+The following is a protocol similar to https://docs.liquity.org. So read those docs for more detail on how CDPs work.
 
 No code was copied from liquity - hence it's very likely there's bugs in the code.
 
