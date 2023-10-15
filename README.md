@@ -1,8 +1,10 @@
 # Pristine - *CDP for bitcoin*
 
-My inspiration for this protocol was Liquity, a DeFi app I use myself as a way of borrowing money using my Eth as collateral. The reason I love it so much is its security (the mechanics of the protocol are "fairly" simple, and it only allows one collateral type - eth), and, importantly, borrowing is interest free! 
+My inspiration for this protocol was Liquity, a DeFi app I use myself as a way of borrowing money using my Eth as collateral. The reasons I love it so much are twofold:
+-  its security (the mechanics of the protocol are "fairly" simple, and it only allows one collateral type - eth)
+- Borrowing is interest free! I have a pretty sizable loan which I don't plan to repay for a good few years - the only concern is not getting liquidated - aka don't use too much leverage!
 
-The following is protocol similar to https://docs.liquity.org. So read those docs for more detail on how CDPs work.
+For further reading on Liquidity, read the following docs: https://docs.liquity.org.
 
 No code was copied from liquity. 
 Code has not been audited.
