@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ISatoshi} from "./interfaces/SatoshiInterface.sol";
+import {ISatoshi} from "./interfaces/ISatoshiInterface.sol";
 import {AggregatorV3Interface} from "./interfaces/IOracle.sol";
-import {IAaveOracle} from "./interfaces/AaveOracle.sol";
+import {IAaveOracle} from "./interfaces/IAaveOracle.sol";
 import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 
 contract Pristine {

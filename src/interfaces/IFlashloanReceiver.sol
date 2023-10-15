@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "forge-std/Test.sol";
 import "src/Pristine.sol";
 import "src/SatoshiERC20.sol";
-import {ISatoshi} from "src/interfaces/SatoshiInterface.sol";
+import {ISatoshi} from "src/interfaces/ISatoshiInterface.sol";
 import {IUniswapV2Router02} from "lib/amm/interfaces/IUniswapV2Router02.sol";
 
 contract FlashloanReceiver {
