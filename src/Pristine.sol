@@ -26,7 +26,7 @@ contract Pristine {
     mapping(address => uint256) public UserPosition;
 
     /*//////////////////////////////////////////////////////////////
-                EVENTS / ERRORS / STRUCTS / MODIFIERS
+                                EVENTS 
     //////////////////////////////////////////////////////////////*/
 
     event Open(uint256 indexed id, address indexed owner, uint256 collatAmount);
@@ -35,6 +35,10 @@ contract Pristine {
     event Repay(uint256 indexed id, uint256 repaidAmount);
     event Withdraw(uint256 indexed id, uint256 collatAmount);
     event Liquidate(uint256 indexed id, uint256 collatAmount);
+
+    /*//////////////////////////////////////////////////////////////
+                                 ERRORS
+    //////////////////////////////////////////////////////////////*/
 
     error PositionNotHealthy(uint256 id);
     error PositionHealthy(uint256 id);
@@ -45,12 +49,20 @@ contract Pristine {
     error AlreadyInitialized();
     error FaultyOracle();
 
+    /*//////////////////////////////////////////////////////////////
+                                STRUCTS
+    //////////////////////////////////////////////////////////////*/
+
     struct Position {
         address owner;
         uint256 id;
         uint256 collatAmount;
         uint256 borrowedAmount;
     }
+
+    /*//////////////////////////////////////////////////////////////
+                               MODIFIERS
+    //////////////////////////////////////////////////////////////*/
 
     modifier PositionExists(uint256 _id) {
         if (Positions[_id].owner == address(0)) revert PositionNotFound(_id);
