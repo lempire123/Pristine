@@ -15,15 +15,15 @@ contract Pristine {
         0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c; // Chainlink Price Feed address on Ethereum Mainnet
     address public constant AAVE_ORACLE =
         0xAC4A2aC76D639E10f2C05a41274c1aF85B772598;
-    IERC20 public constant wBTC =
+    IERC20 public constant WBTC =
         IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
     uint256 public constant COLLAT_RATIO = 110; // 110%
-    string public constant OWNER_ERROR = "ONLY_OWNER";
     ISatoshi public Satoshi;
-    address public immutable owner;
+    address public immutable deployer;
     uint256 public positionCounter; // Support 2^256 positions (more than enough)
 
     mapping(uint256 => Position) public Positions;
+    mapping(address => uint256) public UserPosition;
 
     /*//////////////////////////////////////////////////////////////
                 EVENTS / ERRORS / STRUCTS / MODIFIERS
@@ -37,6 +37,13 @@ contract Pristine {
     event Liquidate(uint256 indexed id, uint256 collatAmount);
 
     error PositionNotHealthy(uint256 id);
+    error PositionHealthy(uint256 id);
+    error PositionNotFound(uint256 id);
+    error NotOwner();
+    error NotDeployer();
+    error CannotCreateMultiplePositions();
+    error AlreadyInitialized();
+    error FaultyOracle();
 
     struct Position {
         address owner;
@@ -46,7 +53,22 @@ contract Pristine {
     }
 
     modifier PositionExists(uint256 _id) {
-        require(Positions[_id].owner != address(0), "POSITION_NOT_FOUND");
+        if (Positions[_id].owner == address(0)) revert PositionNotFound(_id);
+        _;
+    }
+
+    modifier onlyDeployer() {
+        if (msg.sender != deployer) revert NotDeployer();
+        _;
+    }
+
+    modifier onlyOwner(uint256 _id) {
+        if (msg.sender != Positions[_id].owner) revert NotOwner();
+        _;
+    }
+
+    modifier notInitialized() {
+        if (address(Satoshi) != address(0)) revert AlreadyInitialized();
         _;
     }
 
@@ -56,7 +78,7 @@ contract Pristine {
     // @notice - Sets the owner of the contract to the deployer
     // @dev - Owner's power is limited to setting the address of the Satoshi contract
     constructor() {
-        owner = msg.sender;
+        deployer = msg.sender;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -66,17 +88,17 @@ contract Pristine {
     // @notice - Sets the address of the Satoshi contract
     // @dev - Only the owner can call this function
     // @param _Satoshi - The address of the Satoshi contract
-    function initSatoshi(address _Satoshi) public {
-        require(msg.sender == owner, OWNER_ERROR);
-        require(address(Satoshi) == address(0));
+    function initSatoshi(address _Satoshi) public onlyDeployer notInitialized {
         Satoshi = ISatoshi(_Satoshi);
     }
 
     // @notice - Opens a new position
-    // @dev - Transfers the amount of wBTC from the caller to the contract
-    // @param _amount - The amount of wBTC to be deposited as collateral
+    // @dev - Transfers the amount of WBTC from the caller to the contract
+    // @param _amount - The amount of WBTC to be deposited as collateral
     function open(uint256 _amount) public returns (uint256) {
-        wBTC.transferFrom(msg.sender, address(this), _amount);
+        if (UserPosition[msg.sender] != 0)
+            revert CannotCreateMultiplePositions();
+        WBTC.transferFrom(msg.sender, address(this), _amount);
         positionCounter++;
         Positions[positionCounter] = Position(
             msg.sender,
@@ -84,16 +106,17 @@ contract Pristine {
             _amount,
             0
         );
+        UserPosition[msg.sender] = positionCounter;
         emit Open(positionCounter, msg.sender, _amount);
 
         return positionCounter;
     }
 
-    // @notice - Deposits wBTC into an existing position
-    // @dev - Transfers the amount of wBTC from the caller to the contract
-    // @param _amount - The amount of wBTC to be deposited as collateral
+    // @notice - Deposits WBTC into an existing position
+    // @dev - Transfers the amount of WBTC from the caller to the contract
+    // @param _amount - The amount of WBTC to be deposited as collateral
     function deposit(uint256 _amount, uint256 _id) public PositionExists(_id) {
-        wBTC.transferFrom(msg.sender, address(this), _amount);
+        WBTC.transferFrom(msg.sender, address(this), _amount);
         Positions[_id].collatAmount += _amount;
 
         emit Deposit(_id, _amount);
@@ -102,8 +125,10 @@ contract Pristine {
     // @notice - Borrows Satoshi from an existing position
     // @dev - Mints the amount of Satoshi to the caller
     // @param _amount - The amount of Satoshi to be borrowed
-    function borrow(uint256 _amount, uint256 _id) public PositionExists(_id) {
-        require(Positions[_id].owner == msg.sender, OWNER_ERROR);
+    function borrow(
+        uint256 _amount,
+        uint256 _id
+    ) public PositionExists(_id) onlyOwner(_id) {
         Satoshi.mint(msg.sender, _amount);
         Positions[_id].borrowedAmount += _amount;
         if (!checkPositionHealth(_id)) revert PositionNotHealthy(_id);
@@ -121,12 +146,14 @@ contract Pristine {
         emit Repay(_id, _amount);
     }
 
-    // @notice - Withdraws wBTC from an existing position
-    // @dev - Transfers the amount of wBTC to the caller
-    // @param _amount - The amount of wBTC to be withdrawn
-    function withdraw(uint256 _amount, uint256 _id) public PositionExists(_id) {
-        require(Positions[_id].owner == msg.sender, OWNER_ERROR);
-        wBTC.transfer(msg.sender, _amount);
+    // @notice - Withdraws WBTC from an existing position
+    // @dev - Transfers the amount of WBTC to the caller
+    // @param _amount - The amount of WBTC to be withdrawn
+    function withdraw(
+        uint256 _amount,
+        uint256 _id
+    ) public PositionExists(_id) onlyOwner(_id) {
+        WBTC.transfer(msg.sender, _amount);
         Positions[_id].collatAmount -= _amount;
         if (!checkPositionHealth(_id)) revert PositionNotHealthy(_id);
 
@@ -134,13 +161,13 @@ contract Pristine {
     }
 
     // @notice - Liquidates an unhealthy position
-    // @dev - Transfers the amount of wBTC to the caller
+    // @dev - Transfers the amount of WBTC to the caller
     // @param _id - The id of the position to be liquidated
     function liquidatePosition(uint256 _id) public PositionExists(_id) {
-        require(!checkPositionHealth(_id), "POSITION_HEALTHY");
+        if (checkPositionHealth(_id)) revert PositionHealthy(_id);
         Position memory position = Positions[_id];
         Satoshi.burn(msg.sender, position.borrowedAmount);
-        wBTC.transfer(msg.sender, position.collatAmount);
+        WBTC.transfer(msg.sender, position.collatAmount);
 
         //Update Positions
         delete Positions[_id];
@@ -165,7 +192,7 @@ contract Pristine {
         return (collateralValue * 100) / borrowedValue >= COLLAT_RATIO;
     }
 
-    // @notice - Gets the price of wBTC in USD
+    // @notice - Gets the price of WBTC in USD
     // @dev - Uses chainlink as primary oracle, Aave as secondary
     function getCollatPrice() public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(
@@ -178,8 +205,10 @@ contract Pristine {
             return chainlinkPrice / 10 ** 8;
         } else {
             uint256 aavePrice = IAaveOracle(AAVE_ORACLE).getAssetPrice(
-                address(wBTC)
+                address(WBTC)
             );
+
+            if (aavePrice == 0) revert FaultyOracle();
 
             return aavePrice / 10 ** 8;
         }

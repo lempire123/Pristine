@@ -31,12 +31,12 @@ contract FlashloanReceiver {
         // liquidate
         Pristine(pristine).liquidatePosition(id);
         address[] memory path = new address[](2);
-        path[0] = address(Pristine(pristine).wBTC());
+        path[0] = address(Pristine(pristine).WBTC());
         path[1] = address(Pristine(pristine).Satoshi());
         // Now we have the collateral, we can swap it for the debt
-        Pristine(pristine).wBTC().approve(router, type(uint256).max);
+        Pristine(pristine).WBTC().approve(router, type(uint256).max);
         IUniswapV2Router02(router).swapExactTokensForTokens(
-            Pristine(pristine).wBTC().balanceOf(address(this)),
+            Pristine(pristine).WBTC().balanceOf(address(this)),
             0,
             path,
             address(this),

@@ -23,8 +23,8 @@ contract SatoshiTest is Test {
         receiver = new FlashloanReceiver();
         alice = vm.addr(1);
         bob = vm.addr(2);
-        deal(address(pristine.wBTC()), alice, 1000 * 10 ** 8);
-        deal(address(pristine.wBTC()), bob, 1000 * 10 ** 8);
+        deal(address(pristine.WBTC()), alice, 1000 * 10 ** 8);
+        deal(address(pristine.WBTC()), bob, 1000 * 10 ** 8);
     }
 
     /*//////////////////////////////////////////////////////////////

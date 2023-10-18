@@ -1,22 +1,34 @@
-# Pristine - *CDP for bitcoin*
+# **Pristine**: Stablecoin Backed by Bitcoin
 
-My inspiration for this protocol was Liquity, a DeFi app I use myself as a way of borrowing money using my Eth as collateral. The reasons I love it so much are twofold:
--  its security (the mechanics of the protocol are "fairly" simple, and it only allows one collateral type - eth)
-- Borrowing is interest free! I have a pretty sizable loan which I don't plan to repay for a good few years - the only concern is not getting liquidated - aka don't use too much leverage!
+Inspired by Liquity, a decentralized finance (DeFi) application I frequently use to borrow funds against my Ethereum holdings, Pristine aims to bring a robust and user-friendly borrowing experience to the Bitcoin ecosystem.
 
-For further reading on Liquidity, read the following docs: https://docs.liquity.org.
+I admire Liquity for its:
+- **Security:** The protocol is fairly straightforward, focusing solely on Ethereum as collateral.
+- **Interest-free Borrowing:** With a significant loan that I don’t intend to repay soon, the only concern is avoiding liquidation by maintaining a safe leverage.
 
-No code was copied from liquity. 
-Code has not been audited.
+Explore more about Liquity in their [documentation](https://docs.liquity.org).
 
-# Technical details: 
+## **Goals**
 
-- Collateral token is wBTC
-- Collateral ratio is 110%
-- No interest on loans
-- Liquidations can happen when collat ratio is < 110%
-- On liquidation, the liquidator must repay all the loan, and gets to keep the liquidatee's collateral
+Pristine strives to create a stablecoin anchored by the unparalleled liquidity and reputation of Bitcoin. While there are existing protocols enabling stablecoin minting backed by Bitcoin, Pristine sets itself apart by exclusively accepting Bitcoin as collateral and offering an interest-free borrowing experience.
 
+## **Technical Details**
 
+- **Collateral Token:** Wrapped Bitcoin (wBTC), renowned as the hardest asset.
+- **Collateral Ratio:** 110%.
+- **Interest on Loans:** None.
+- **Liquidation Threshold:** Triggered when the collateral ratio falls below 110%.
+- **Liquidation Process:** Liquidators are required to repay the entire loan to claim the collateral.
 
+## **Code Structure**
+
+- **Smart Contracts:** Located [here](./src). Build with the command:
+  ```sh
+  forge build 
+  ```
+
+- **Test:** Available [here](./test). Run using the command:
+ ```sh
+  forge test -vvv
+```
 
