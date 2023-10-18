@@ -50,7 +50,7 @@ contract PristineTest is Test {
         pristine.WBTC().approve(address(pristine), depositAmount);
         uint256 id = pristine.open(depositAmount);
         (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .getPosition(id);
+            .Positions(id);
         assert(owner == alice);
         assert(_id == 1);
         assert(collat == depositAmount);
@@ -63,7 +63,7 @@ contract PristineTest is Test {
         uint256 id = pristine.open(10 * 10 ** 8);
         pristine.borrow(1000 * 10 ** 18, id);
         (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .getPosition(id);
+            .Positions(id);
         assert(owner == alice);
         assert(_id == 1);
         assert(collat == 10 * 10 ** 8);
@@ -77,7 +77,7 @@ contract PristineTest is Test {
         pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
         pristine.deposit(10 * 10 ** 8, id);
         (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .getPosition(id);
+            .Positions(id);
         assert(owner == alice);
         assert(_id == 1);
         assert(collat == 20 * 10 ** 8);
@@ -92,7 +92,7 @@ contract PristineTest is Test {
         pristine.deposit(10 * 10 ** 8, id);
         pristine.withdraw(5 * 10 ** 8, id);
         (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .getPosition(id);
+            .Positions(id);
         assert(owner == alice);
         assert(_id == 1);
         assert(collat == 15 * 10 ** 8);
@@ -107,7 +107,7 @@ contract PristineTest is Test {
         pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
         pristine.repay(1000 * 10 ** 18, id);
         (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .getPosition(id);
+            .Positions(id);
         assert(owner == alice);
         assert(_id == 1);
         assert(collat == 10 * 10 ** 8);
@@ -152,7 +152,7 @@ contract PristineTest is Test {
         pristine.WBTC().approve(address(pristine), depositAmount * 2);
         uint256 id = pristine.open(depositAmount);
         (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .getPosition(id);
+            .Positions(id);
         assert(owner == alice);
         assert(_id == 1);
         assert(collat == depositAmount);

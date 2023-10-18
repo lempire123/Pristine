@@ -229,15 +229,15 @@ contract Pristine {
     // @notice - Gets the position details
     // @dev - Returns the owner, id, collateral amount, and borrowed amount of the position
     // @param _id - The id of the position to be checked
-    function getPosition(
-        uint256 _id
-    ) public view returns (address, uint256, uint256, uint256) {
-        Position memory position = Positions[_id];
-        return (
-            position.owner,
-            position.id,
-            position.collatAmount,
-            position.borrowedAmount
-        );
-    }
+    // function getPosition(
+    //     uint256 _id
+    // ) public view returns (address, uint256, uint256, uint256) {
+    //     Position memory position = Positions[_id];
+    //     return (
+    //         position.owner,
+    //         position.id,
+    //         position.collatAmount,
+    //         position.borrowedAmount
+    //     );
+    // }
 }
