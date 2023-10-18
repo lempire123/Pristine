@@ -29,12 +29,16 @@ contract Pristine {
                                 EVENTS 
     //////////////////////////////////////////////////////////////*/
 
-    event Open(uint256 indexed id, address indexed owner, uint256 collatAmount);
-    event Deposit(uint256 indexed id, uint256 collatAmount);
-    event Borrow(uint256 indexed id, uint256 borrowedAmount);
-    event Repay(uint256 indexed id, uint256 repaidAmount);
-    event Withdraw(uint256 indexed id, uint256 collatAmount);
-    event Liquidate(uint256 indexed id, uint256 collatAmount);
+    event Opened(
+        uint256 indexed id,
+        address indexed owner,
+        uint256 collatAmount
+    );
+    event Deposited(uint256 indexed id, uint256 collatAmount);
+    event Borrowed(uint256 indexed id, uint256 borrowedAmount);
+    event Repayed(uint256 indexed id, uint256 repaidAmount);
+    event Withdrew(uint256 indexed id, uint256 collatAmount);
+    event Liquidated(uint256 indexed id, uint256 collatAmount);
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -119,7 +123,7 @@ contract Pristine {
             0
         );
         UserPosition[msg.sender] = positionCounter;
-        emit Open(positionCounter, msg.sender, _amount);
+        emit Opened(positionCounter, msg.sender, _amount);
 
         return positionCounter;
     }
@@ -131,7 +135,7 @@ contract Pristine {
         WBTC.transferFrom(msg.sender, address(this), _amount);
         Positions[_id].collatAmount += _amount;
 
-        emit Deposit(_id, _amount);
+        emit Deposited(_id, _amount);
     }
 
     // @notice - Borrows Satoshi from an existing position
@@ -145,7 +149,7 @@ contract Pristine {
         Positions[_id].borrowedAmount += _amount;
         if (!checkPositionHealth(_id)) revert PositionNotHealthy(_id);
 
-        emit Borrow(_id, _amount);
+        emit Borrowed(_id, _amount);
     }
 
     // @notice - Repays Satoshi to an existing position
@@ -155,7 +159,7 @@ contract Pristine {
         Satoshi.burn(msg.sender, _amount);
         Positions[_id].borrowedAmount -= _amount;
 
-        emit Repay(_id, _amount);
+        emit Repayed(_id, _amount);
     }
 
     // @notice - Withdraws WBTC from an existing position
@@ -169,12 +173,12 @@ contract Pristine {
         Positions[_id].collatAmount -= _amount;
         if (!checkPositionHealth(_id)) revert PositionNotHealthy(_id);
 
-        emit Withdraw(_id, _amount);
+        emit Withdrew(_id, _amount);
     }
 
-    // @notice - Liquidates an unhealthy position
+    // @notice - liquidates an unhealthy position
     // @dev - Transfers the amount of WBTC to the caller
-    // @param _id - The id of the position to be liquidated
+    // @param _id - The id of the position to be liquidates
     function liquidatePosition(uint256 _id) public PositionExists(_id) {
         if (checkPositionHealth(_id)) revert PositionHealthy(_id);
         Position memory position = Positions[_id];
@@ -184,7 +188,7 @@ contract Pristine {
         //Update Positions
         delete Positions[_id];
 
-        emit Liquidate(_id, position.collatAmount);
+        emit Liquidated(_id, position.collatAmount);
     }
 
     /*//////////////////////////////////////////////////////////////
