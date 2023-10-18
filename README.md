@@ -28,7 +28,7 @@ Pristine strives to create a stablecoin anchored by the unparalleled liquidity a
   ```
 
 - **Test:** Available [here](./test). Run using the command:
- ```sh
+  ```sh
   forge test -vvv
-```
+    ```
 
