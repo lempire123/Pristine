@@ -22,12 +22,27 @@ Pristine strives to create a stablecoin anchored by the unparalleled liquidity a
 
 ## **Code Structure**
 
+## **Prerequisites**
+
+Before diving into the code, ensure you have the following prerequisites installed and set up:
+
+- **[Foundry](https://foundry.link/):** Make sure to install and configure Foundry as it is essential for building and testing the smart contracts in this project.
+
+## **Cloning the Project**
+
+To work on this project locally, you'll need to clone the repository to your machine:
+
+```sh
+git clone https://github.com/<Original-Repo-Username>/<Repo-Name>.git
+cd <Repo-Name>
+```
+
 - **Smart Contracts:** Located [here](./src). Build with the command:
   ```sh
   forge build 
   ```
 
-- **Test:** Available [here](./test). Run using the command:
+- **Tests:** Available [here](./test). Run using the command:
   ```sh
   forge test -vvv
     ```

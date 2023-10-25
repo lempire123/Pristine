@@ -18,6 +18,7 @@ contract Pristine {
     IERC20 public constant WBTC =
         IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
     uint256 public constant COLLAT_RATIO = 110; // 110%
+    uint256 public constant REDEMPTION_VALUE = 95; // 95%
     ISatoshi public Satoshi;
     address public immutable deployer;
     uint256 public positionCounter; // Support 2^256 positions (more than enough)
@@ -39,6 +40,11 @@ contract Pristine {
     event Repayed(uint256 indexed id, uint256 repaidAmount);
     event Withdrew(uint256 indexed id, uint256 collatAmount);
     event Liquidated(uint256 indexed id, uint256 collatAmount);
+    event Redeemed(
+        uint256 indexed id,
+        address indexed redeemer,
+        uint256 amount
+    );
 
     /*//////////////////////////////////////////////////////////////
                                  ERRORS
@@ -192,6 +198,33 @@ contract Pristine {
         emit Liquidated(_id, position.collatAmount);
     }
 
+    // @notice - Redeems Satoshi for WBTC from a specified position
+    // @param _id - The id of the position to be redeemed from
+    // @param _amount - The amount of Satoshi to be redeemed
+    function redeem(uint256 _id, uint256 _amount) public PositionExists(_id) {
+        Satoshi.burn(msg.sender, _amount);
+
+        uint256 btcPrice = getCollatPrice();
+        uint256 redeemableBTC = ((_amount * REDEMPTION_VALUE) / 100) / btcPrice;
+
+        // Ensure the position has enough collateral for the redemption
+        Position memory position = Positions[_id];
+        require(
+            position.collatAmount >= redeemableBTC,
+            "Not enough collateral"
+        );
+
+        position.collatAmount -= redeemableBTC;
+        position.borrowedAmount -= _amount;
+        Positions[_id] = position;
+
+        // Transfer the redeemable WBTC amount to the caller
+        WBTC.transfer(msg.sender, redeemableBTC);
+
+        // Emit a custom event if needed (e.g., Redeemed)
+        emit Redeemed(_id, msg.sender, _amount);
+    }
+
     /*//////////////////////////////////////////////////////////////
                             HELPER FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -211,6 +244,7 @@ contract Pristine {
 
     // @notice - Gets the price of WBTC in USD
     // @dev - Uses chainlink as primary oracle, Aave as secondary
+    // Importantly, returns the price normalized to 10 ** 8
     function getCollatPrice() public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(
             PRICE_FEED_ADDRESS
