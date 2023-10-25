@@ -20,22 +20,21 @@ Pristine strives to create a stablecoin anchored by the unparalleled liquidity a
 - **Liquidation Threshold:** Triggered when the collateral ratio falls below 110%.
 - **Liquidation Process:** Liquidators are required to repay the entire loan to claim the collateral.
 
-## **Code Structure**
+## **Project Setup**
 
-## **Prerequisites**
+### **Prerequisites**
 
 Before diving into the code, ensure you have the following prerequisites installed and set up:
 
-- **[Foundry](https://foundry.link/):** Make sure to install and configure Foundry as it is essential for building and testing the smart contracts in this project.
+- **[Foundry](https://book.getfoundry.sh/getting-started/installation):** 
 
-## **Cloning the Project**
+### **Cloning the Project**
 
 To work on this project locally, you'll need to clone the repository to your machine:
 
 ```sh
-git clone https://github.com/<Original-Repo-Username>/<Repo-Name>.git
-cd <Repo-Name>
-```
+git clone https://github.com/lempire123/Pristine.git Pristine
+cd Pristine
 
 - **Smart Contracts:** Located [here](./src). Build with the command:
   ```sh
