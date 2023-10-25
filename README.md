@@ -26,7 +26,7 @@ Pristine strives to create a stablecoin anchored by the unparalleled liquidity a
 
 Before diving into the code, ensure you have foundry installed:
 
-- **[Foundry](https://book.getfoundry.sh/getting-started/installation):** 
+- **[Foundry](https://book.getfoundry.sh/getting-started/installation)** 
 
 ### **Cloning the Project**
 
