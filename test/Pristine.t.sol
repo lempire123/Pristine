@@ -172,8 +172,9 @@ contract PristineTest is Test {
         bytes4 selector = Pristine.PositionNotHealthy.selector;
         bytes memory encodedError = abi.encodeWithSelector(selector, id);
 
+        uint256 btcPrice = pristine.getCollatPrice();
         vm.expectRevert(encodedError);
-        pristine.borrow(26_000 * 10 ** 18, id);
+        pristine.borrow(btcPrice * 10 ** 8, id);
     }
 
     function test_WithdrawTooMuch() public {
@@ -186,6 +187,7 @@ contract PristineTest is Test {
     }
 
     // Open question whether other should be able to deposit into your position
+    // Protocol currently allows it
     function test_depositIntoOtherPosition() public {
         vm.startPrank(alice);
         pristine.WBTC().approve(address(pristine), 1 * 10 ** 8);

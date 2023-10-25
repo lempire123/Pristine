@@ -19,6 +19,7 @@ Pristine strives to create a stablecoin anchored by the unparalleled liquidity a
 - **Interest on Loans:** None.
 - **Liquidation Threshold:** Triggered when the collateral ratio falls below 110%.
 - **Liquidation Process:** Liquidators are required to repay the entire loan to claim the collateral.
+- **Redemption process** Any holders of the Satoshi Stablecoin can redeem it for 0.95$ worth of wBTC collateral (essentially creating a floor price of 0.95$).
 
 ## **Project Setup**
 
