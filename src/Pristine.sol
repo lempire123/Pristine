@@ -218,10 +218,8 @@ contract Pristine {
         position.borrowedAmount -= _amount;
         Positions[_id] = position;
 
-        // Transfer the redeemable WBTC amount to the caller
         WBTC.transfer(msg.sender, redeemableBTC);
 
-        // Emit a custom event if needed (e.g., Redeemed)
         emit Redeemed(_id, msg.sender, _amount);
     }
 
