@@ -24,7 +24,7 @@ Pristine strives to create a stablecoin anchored by the unparalleled liquidity a
 
 ### **Prerequisites**
 
-Before diving into the code, ensure you have the following prerequisites installed and set up:
+Before diving into the code, ensure you have foundry installed:
 
 - **[Foundry](https://book.getfoundry.sh/getting-started/installation):** 
 
@@ -35,6 +35,7 @@ To work on this project locally, you'll need to clone the repository to your mac
 ```sh
 git clone https://github.com/lempire123/Pristine.git Pristine
 cd Pristine
+```
 
 - **Smart Contracts:** Located [here](./src). Build with the command:
   ```sh
