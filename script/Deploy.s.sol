@@ -10,9 +10,6 @@ contract DeployScript is Script {
         vm.broadcast();
 
         Pristine pristine = new Pristine();
-        Satoshi satoshi = new Satoshi(address(pristine));
-        Pristine(pristine).initSatoshi(address(satoshi));
-
-        vm.stopBroadcast();
+        new Satoshi(address(pristine));
     }
 }
