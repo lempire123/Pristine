@@ -58,6 +58,8 @@ contract Pristine {
     error CannotCreateMultiplePositions();
     error AlreadyInitialized();
     error FaultyOracle();
+    error NotEnoughCollateral();
+    error NotEnoughDebt();
 
     /*//////////////////////////////////////////////////////////////
                                 STRUCTS
@@ -205,14 +207,13 @@ contract Pristine {
         Satoshi.burn(msg.sender, _amount);
 
         uint256 btcPrice = getCollatPrice();
-        uint256 redeemableBTC = ((_amount * REDEMPTION_VALUE) / 100) / btcPrice;
+        uint256 redeemableBTC = (((_amount * REDEMPTION_VALUE) / 10 ** 12) /
+            btcPrice);
 
         // Ensure the position has enough collateral for the redemption
         Position memory position = Positions[_id];
-        require(
-            position.collatAmount >= redeemableBTC,
-            "Not enough collateral"
-        );
+        if (position.collatAmount < redeemableBTC) revert NotEnoughCollateral();
+        if (position.borrowedAmount < _amount) revert NotEnoughDebt();
 
         position.collatAmount -= redeemableBTC;
         position.borrowedAmount -= _amount;

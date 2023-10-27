@@ -22,7 +22,7 @@ contract PristineTest is Test {
     address public bob;
     // Initial BTC balance for bob and alice.
     uint256 public constant INITIAL_BAL = 1000 * 10 ** 8;
-    bytes notOwnerError;
+    bytes public notOwnerError;
 
     // The setup involved creating a fork of mainnet, deploying the contracts, and
     // funding alice and bob with some BTC (1000 BTC each)
@@ -55,6 +55,7 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == depositAmount);
         assert(debt == 0);
+        vm.stopPrank();
     }
 
     function test_Borrow() public {
@@ -68,6 +69,7 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == 10 * 10 ** 8);
         assert(debt == 1000 * 10 ** 18);
+        vm.stopPrank();
     }
 
     function test_Deposit() public {
@@ -82,6 +84,7 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == 20 * 10 ** 8);
         assert(debt == 0);
+        vm.stopPrank();
     }
 
     function test_Withdraw() public {
@@ -97,6 +100,7 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == 15 * 10 ** 8);
         assert(debt == 0);
+        vm.stopPrank();
     }
 
     function test_Repay() public {
@@ -112,6 +116,7 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == 10 * 10 ** 8);
         assert(debt == 0);
+        vm.stopPrank();
     }
 
     function test_Limit(uint256 depositAmount, uint256 borrowAmount) public {
@@ -137,7 +142,54 @@ contract PristineTest is Test {
             vm.expectRevert(encodedError);
             pristine.borrow(borrowAmount * 10 ** 18, id);
         }
+        vm.stopPrank();
     }
+
+    /*//////////////////////////////////////////////////////////////
+                             REDEMPTION TESTS
+    //////////////////////////////////////////////////////////////*/
+
+    function test_RedemptionNormal() public {
+        uint256 depositAmount = 10 * 10 ** 8;
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
+        uint256 id = pristine.open(10 * 10 ** 8);
+        pristine.borrow(1000 * 10 ** 18, id);
+        satoshi.transfer(bob, satoshi.balanceOf(alice));
+        vm.stopPrank();
+
+        (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
+            .Positions(id);
+        assert(owner == alice);
+        assert(_id == 1);
+        assert(collat == depositAmount);
+        assert(debt == 1000 * 10 ** 18);
+
+        assert(satoshi.balanceOf(bob) == 1000 * 10 ** 18);
+
+        vm.startPrank(bob);
+        pristine.redeem(id, 500 * 10 ** 18);
+        uint256 btcPrice = pristine.getCollatPrice();
+        uint256 satoshiAmountInBTC = (500 * 10 ** 8 * 95) / (btcPrice * 100);
+        console.log("satoshiAmountInBTC", satoshiAmountInBTC);
+        console.log("btc balance", pristine.WBTC().balanceOf(bob));
+        vm.stopPrank();
+
+        (owner, _id, collat, debt) = pristine.Positions(id);
+        assert(owner == alice);
+        assert(_id == 1);
+        assert(collat == depositAmount - satoshiAmountInBTC);
+        assert(debt == (1000 * 10 ** 18) - (500 * 10 ** 18));
+
+        assert(satoshi.balanceOf(bob) == 500 * 10 ** 18);
+        assert(
+            pristine.WBTC().balanceOf(bob) == satoshiAmountInBTC + INITIAL_BAL
+        );
+    }
+
+    function test_RedemptionExcessAmount() public {}
+
+    function test_RedemptionWithoutBorrow() public {}
 
     /*//////////////////////////////////////////////////////////////
                                FAIL CASES
@@ -162,6 +214,7 @@ contract PristineTest is Test {
 
         vm.expectRevert(encodedError);
         id = pristine.open(depositAmount);
+        vm.stopPrank();
     }
 
     function test_BorrowTooMuch() public {
@@ -174,7 +227,8 @@ contract PristineTest is Test {
 
         uint256 btcPrice = pristine.getCollatPrice();
         vm.expectRevert(encodedError);
-        pristine.borrow(btcPrice * 10 ** 8, id);
+        pristine.borrow(btcPrice, id);
+        vm.stopPrank();
     }
 
     function test_WithdrawTooMuch() public {
@@ -184,6 +238,7 @@ contract PristineTest is Test {
 
         vm.expectRevert();
         pristine.withdraw(26_000 * 10 ** 8, id);
+        vm.stopPrank();
     }
 
     // Open question whether other should be able to deposit into your position
@@ -196,6 +251,7 @@ contract PristineTest is Test {
         vm.startPrank(bob);
         pristine.WBTC().approve(address(pristine), 1 * 10 ** 8);
         pristine.deposit(1 * 10 ** 8, id);
+        vm.stopPrank();
     }
 
     function test_borrowFromOtherPosition() public {
@@ -206,6 +262,7 @@ contract PristineTest is Test {
         vm.startPrank(bob);
         vm.expectRevert(notOwnerError);
         pristine.borrow(1, id);
+        vm.stopPrank();
     }
 
     function test_withdrawFromOtherPosition() public {
@@ -216,6 +273,7 @@ contract PristineTest is Test {
         vm.startPrank(bob);
         vm.expectRevert(notOwnerError);
         pristine.withdraw(1 * 10 ** 8, id);
+        vm.stopPrank();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -236,6 +294,7 @@ contract PristineTest is Test {
 
         vm.expectRevert(encodedError);
         pristine.liquidatePosition(1);
+        vm.stopPrank();
     }
 
     function test_liquidateSuccess() public {
@@ -277,6 +336,7 @@ contract PristineTest is Test {
         // Now alice tries to withdraw collat - fail
         vm.expectRevert(encodedError);
         pristine.repay(40_000 * 10 ** 18, id);
+        vm.stopPrank();
     }
 
     // For this test we need to deploy a flashloan receiver contract
@@ -331,5 +391,6 @@ contract PristineTest is Test {
             "liquidation profit",
             satoshi.balanceOf(address(this)) / 10 ** 18
         );
+        vm.stopPrank();
     }
 }
