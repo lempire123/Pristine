@@ -42,11 +42,6 @@ This dynamic redemption rate mechanism is beneficial in multiple ways:
   
 - **Incentive Alignment:** The varying redemption rates create a natural incentive for participants to act in a manner that promotes system stability.
 
-### **Comparative Advantage Over Liquity:**
-Unlike Liquity's one-size-fits-all redemption rate of $1.00, Pristine’s dynamic redemption rate provides a more nuanced approach to manage redemptions in alignment with the system's health. This not only promotes better risk management but also fosters a more resilient and user-centric borrowing experience in the Pristine ecosystem. 
-
-Explore the technical intricacies of this innovative redemption process in the [smart contract code](./src/Pristine.sol) or delve into the [testing suite](./test) to see it in action.
-
 ## **Project Setup**
 
 ### **Prerequisites**
