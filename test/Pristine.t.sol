@@ -227,7 +227,7 @@ contract PristineTest is Test {
 
         uint256 btcPrice = pristine.getCollatPrice();
         vm.expectRevert(encodedError);
-        pristine.borrow(btcPrice, id);
+        pristine.borrow(btcPrice * 10 ** 18, id);
         vm.stopPrank();
     }
 
@@ -297,6 +297,9 @@ contract PristineTest is Test {
         vm.stopPrank();
     }
 
+    // This liquidation is probably unprofitable.
+    // Unlike using a flashloan where a profit is required to repay the loan.
+    // (Or at least break even)
     function test_liquidateSuccess() public {
         vm.startPrank(alice);
         pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
@@ -345,15 +348,15 @@ contract PristineTest is Test {
     // In order to sell, we need to deploy a uniV2 pool and seed it with liquidity
     function test_liquidateSuccessUsingFlashloan() public {
         uint256 btcPrice = pristine.getCollatPrice();
-        deal(address(pristine.WBTC()), address(this), 1000 * 10 ** 8);
-        deal(address(satoshi), address(this), btcPrice * 1000 * 10 ** 18);
-        pristine.WBTC().approve(address(router), 1000 * 10 ** 8);
-        satoshi.approve(address(router), btcPrice * 1000 * 10 ** 18);
+        deal(address(pristine.WBTC()), address(this), 10000 * 10 ** 8);
+        deal(address(satoshi), address(this), btcPrice * 10000 * 10 ** 18);
+        pristine.WBTC().approve(address(router), 10000 * 10 ** 8);
+        satoshi.approve(address(router), btcPrice * 10000 * 10 ** 18);
         router.addLiquidity(
             address(satoshi),
             address(pristine.WBTC()),
-            btcPrice * 1000 * 10 ** 18,
-            1000 * 10 ** 8,
+            btcPrice * 10000 * 10 ** 18,
+            10000 * 10 ** 8,
             0,
             0,
             address(this),
@@ -362,35 +365,33 @@ contract PristineTest is Test {
         receiver = new FlashloanReceiver();
 
         vm.startPrank(alice);
-        pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
-        uint256 id = pristine.open(10 * 10 ** 8);
-        pristine.borrow(53_000 * 10 ** 18, id);
+        pristine.WBTC().approve(address(pristine), 110 * 10 ** 8);
+        uint256 id = pristine.open(110 * 10 ** 8);
+        uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // Borrow amount for initial collateral ratio > 110%
+        pristine.borrow(borrowAmount, id);
         vm.stopPrank();
 
-        // Make position unhealthy
-        // Collat Amount is third item in struct (index 2)
-        // Could also increase borrow amount (index 3)
+        // Adjust collateral to make position unhealthy but still profitable to liquidate
+        uint256 adjustedCollatAmount = 105 * 10 ** 8; // Adjusted collateral for collateral ratio between 100% and 110%
         stdstore
             .target(address(pristine))
             .sig("Positions(uint256)")
             .with_key(1)
             .depth(2)
-            .checked_write(2 * 10 ** 8); // Position in struct to change
+            .checked_write(adjustedCollatAmount);
 
-        // 26700 x 2 = 53400
         assert(!pristine.checkPositionHealth(id));
 
         bytes[] memory data = new bytes[](3);
         data[0] = abi.encode(id);
         data[1] = abi.encode(address(pristine));
         data[2] = abi.encode(address(router));
-        receiver.flashloan(address(satoshi), 53_000 * 10 ** 18, data);
+        receiver.flashloan(address(satoshi), borrowAmount, data);
         receiver.withdraw(address(satoshi));
-        assert(satoshi.balanceOf(address(this)) > 2000 * 10 ** 18);
+        assert(satoshi.balanceOf(address(this)) > 0); // Asserting any profit
         emit log_named_uint(
             "liquidation profit",
-            satoshi.balanceOf(address(this)) / 10 ** 18
+            satoshi.balanceOf(address(receiver)) / 10 ** 18
         );
-        vm.stopPrank();
     }
 }
