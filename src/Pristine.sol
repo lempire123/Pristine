@@ -17,8 +17,10 @@ contract Pristine {
         0xAC4A2aC76D639E10f2C05a41274c1aF85B772598;
     IERC20 public constant WBTC =
         IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
-    uint256 public constant COLLAT_RATIO = 110; // 110%
-    uint256 public constant REDEMPTION_VALUE = 95; // 95%
+    uint256 public constant MIN_COLLAT_RATIO = 110; // 110%
+    uint256 public constant REDEMPTION_RATE_RISKY = 100; // 1.00$
+    uint256 public constant REDEMPTION_RATE_MEDIUM = 97; // 0.97$
+    uint256 public constant REDEMPTION_RATE_SAFE = 95; // 0.95$
     ISatoshi public Satoshi;
     address public immutable deployer;
     uint256 public positionCounter; // Support 2^256 positions (more than enough)
@@ -207,7 +209,9 @@ contract Pristine {
         Satoshi.burn(msg.sender, _amount);
 
         uint256 btcPrice = getCollatPrice();
-        uint256 redeemableBTC = (((_amount * REDEMPTION_VALUE) / 10 ** 12) /
+        uint256 redemptionRate = getRedemptionRate(_id); // Get the redemption rate based on the collateral ratio
+
+        uint256 redeemableBTC = (((_amount * redemptionRate) / 10 ** 12) /
             btcPrice);
 
         // Ensure the position has enough collateral for the redemption
@@ -238,7 +242,7 @@ contract Pristine {
         uint256 borrowedValue = position.borrowedAmount / 10 ** 18;
         if (borrowedValue == 0) return true;
 
-        return (collateralValue * 100) / borrowedValue >= COLLAT_RATIO;
+        return (collateralValue * 100) / borrowedValue >= MIN_COLLAT_RATIO;
     }
 
     // @notice - Gets the price of WBTC in USD
@@ -261,6 +265,24 @@ contract Pristine {
             if (aavePrice == 0) revert FaultyOracle();
 
             return aavePrice / 10 ** 8;
+        }
+    }
+
+    // Helper function to determine the redemption rate based on the collateral ratio
+    function getRedemptionRate(uint256 _id) public view returns (uint256) {
+        uint256 collatValue = (Positions[_id].collatAmount * getCollatPrice()) /
+            10 ** 8;
+        uint256 borrowedValue = Positions[_id].borrowedAmount / 10 ** 18;
+        uint256 collatRatio = (borrowedValue == 0)
+            ? 0
+            : (collatValue * 100) / borrowedValue;
+
+        if (collatRatio >= 180) {
+            return REDEMPTION_RATE_SAFE;
+        } else if (collatRatio >= 140) {
+            return REDEMPTION_RATE_MEDIUM;
+        } else {
+            return REDEMPTION_RATE_RISKY;
         }
     }
 }

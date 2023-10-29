@@ -149,47 +149,119 @@ contract PristineTest is Test {
                              REDEMPTION TESTS
     //////////////////////////////////////////////////////////////*/
 
-    function test_RedemptionNormal() public {
-        uint256 depositAmount = 10 * 10 ** 8;
+    function test_RedeemRiskyPosition() public {
+        uint256 btcPrice = pristine.getCollatPrice();
+        uint256 depositAmount = 120 * 10 ** 8; // 10 btc
+        uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // 120% collat ratio
         vm.startPrank(alice);
-        pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
-        uint256 id = pristine.open(10 * 10 ** 8);
-        pristine.borrow(1000 * 10 ** 18, id);
-        satoshi.transfer(bob, satoshi.balanceOf(alice));
+        pristine.WBTC().approve(address(pristine), depositAmount);
+        uint256 id = pristine.open(depositAmount);
+        pristine.borrow(borrowAmount, id); // Calculated to make CR ~ 116.67%
         vm.stopPrank();
 
-        (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-            .Positions(id);
-        assert(owner == alice);
-        assert(_id == 1);
-        assert(collat == depositAmount);
-        assert(debt == 1000 * 10 ** 18);
-
-        assert(satoshi.balanceOf(bob) == 1000 * 10 ** 18);
+        uint256 redemptionRate = pristine.getRedemptionRate(id);
 
         vm.startPrank(bob);
+        deal(address(pristine.Satoshi()), bob, 500 * 10 ** 18);
         pristine.redeem(id, 500 * 10 ** 18);
-        uint256 btcPrice = pristine.getCollatPrice();
-        uint256 satoshiAmountInBTC = (500 * 10 ** 8 * 95) / (btcPrice * 100);
-        console.log("satoshiAmountInBTC", satoshiAmountInBTC);
-        console.log("btc balance", pristine.WBTC().balanceOf(bob));
+        uint256 satoshiAmountInBTC = (500 * 10 ** 18 * redemptionRate) /
+            (btcPrice * 10 ** 12);
         vm.stopPrank();
 
-        (owner, _id, collat, debt) = pristine.Positions(id);
-        assert(owner == alice);
-        assert(_id == 1);
+        (, , uint256 collat, uint256 debt) = pristine.Positions(id);
         assert(collat == depositAmount - satoshiAmountInBTC);
-        assert(debt == (1000 * 10 ** 18) - (500 * 10 ** 18));
-
-        assert(satoshi.balanceOf(bob) == 500 * 10 ** 18);
-        assert(
-            pristine.WBTC().balanceOf(bob) == satoshiAmountInBTC + INITIAL_BAL
-        );
+        assert(debt == borrowAmount - (500 * 10 ** 18));
     }
 
-    function test_RedemptionExcessAmount() public {}
+    function test_RedeemMediumPosition() public {
+        uint256 btcPrice = pristine.getCollatPrice();
+        uint256 depositAmount = 160 * 10 ** 8; // 10 btc
+        uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // 160% collat ratio
 
-    function test_RedemptionWithoutBorrow() public {}
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), depositAmount);
+        uint256 id = pristine.open(depositAmount);
+        pristine.borrow(borrowAmount, id); // Calculated to make CR ~ 150%
+        vm.stopPrank();
+
+        uint256 redemptionRate = pristine.getRedemptionRate(id);
+
+        vm.startPrank(bob);
+        deal(address(pristine.Satoshi()), bob, 500 * 10 ** 18);
+        pristine.redeem(id, 500 * 10 ** 18);
+        uint256 satoshiAmountInBTC = (500 * 10 ** 18 * redemptionRate) /
+            (btcPrice * 10 ** 12);
+        vm.stopPrank();
+
+        (, , uint256 collat, uint256 debt) = pristine.Positions(id);
+        assert(collat == depositAmount - satoshiAmountInBTC);
+        assert(debt == borrowAmount - (500 * 10 ** 18));
+    }
+
+    function test_RedeemSafePosition() public {
+        uint256 btcPrice = pristine.getCollatPrice();
+        uint256 depositAmount = 220 * 10 ** 8; // 10 btc
+        uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // 220% collat ratio
+
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), depositAmount);
+        uint256 id = pristine.open(depositAmount);
+        pristine.borrow(borrowAmount, id); // Calculated to make CR ~ 300%
+        vm.stopPrank();
+
+        uint256 redemptionRate = pristine.getRedemptionRate(id);
+
+        vm.startPrank(bob);
+        deal(address(pristine.Satoshi()), bob, 500 * 10 ** 18);
+        pristine.redeem(id, 500 * 10 ** 18);
+        uint256 satoshiAmountInBTC = (500 * 10 ** 18 * redemptionRate) /
+            (btcPrice * 10 ** 12);
+        vm.stopPrank();
+
+        (, , uint256 collat, uint256 debt) = pristine.Positions(id);
+        assert(collat == depositAmount - satoshiAmountInBTC);
+        assert(debt == borrowAmount - (500 * 10 ** 18));
+    }
+
+    function test_RedeemExcessAmount() public {
+        uint256 btcPrice = pristine.getCollatPrice();
+        uint256 depositAmount = 10 * 10 ** 8;
+        uint256 COLLAT_RATIO = pristine.MIN_COLLAT_RATIO();
+        uint256 borrowAmount = (depositAmount * btcPrice * 10 ** 10) /
+            (COLLAT_RATIO * 10 ** 2);
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), depositAmount);
+        uint256 id = pristine.open(depositAmount);
+        pristine.borrow(borrowAmount, id);
+        vm.stopPrank();
+
+        vm.startPrank(bob);
+        deal(address(pristine.Satoshi()), bob, 500 * 10 ** 18);
+        bytes4 selector = Pristine.NotEnoughDebt.selector;
+        bytes memory encodedError = abi.encodeWithSelector(selector);
+
+        vm.expectRevert(encodedError);
+        pristine.redeem(id, 500 * 10 ** 18);
+        vm.stopPrank();
+    }
+
+    function test_RedeemWithoutBorrow() public {
+        uint256 depositAmount = 10 * 10 ** 8;
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), depositAmount);
+        uint256 id = pristine.open(depositAmount);
+        // No borrow
+        vm.stopPrank();
+
+        vm.startPrank(bob);
+        deal(address(pristine.Satoshi()), bob, 500 * 10 ** 18);
+        bytes4 selector = Pristine.NotEnoughDebt.selector;
+        bytes memory encodedError = abi.encodeWithSelector(selector);
+
+        vm.expectRevert(encodedError);
+        pristine.redeem(id, 500 * 10 ** 18);
+        vm.stopPrank();
+    }
 
     /*//////////////////////////////////////////////////////////////
                                FAIL CASES
