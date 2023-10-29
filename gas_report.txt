@@ -1,26 +1,24 @@
 | src/Pristine.sol:Pristine contract |                 |        |        |        |         |
 |------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                    | Deployment Size |        |        |        |         |
-| 843718                             | 4269            |        |        |        |         |
+| 1032315                            | 5211            |        |        |        |         |
 | Function Name                      | min             | avg    | median | max    | # calls |
-| Positions                          | 958             | 958    | 958    | 958    | 10      |
-| Satoshi                            | 415             | 415    | 415    | 415    | 1       |
-| WBTC                               | 250             | 250    | 250    | 250    | 57      |
-| borrow                             | 728             | 78189  | 93602  | 94294  | 8       |
+| MIN_COLLAT_RATIO                   | 218             | 218    | 218    | 218    | 1       |
+| Positions                          | 958             | 958    | 958    | 958    | 19      |
+| Satoshi                            | 348             | 681    | 348    | 2348   | 6       |
+| WBTC                               | 250             | 250    | 250    | 250    | 72      |
+| borrow                             | 728             | 77307  | 79294  | 94294  | 12      |
 | checkPositionHealth                | 5525            | 5525   | 5525   | 5525   | 2       |
-| deposit                            | 6193            | 7473   | 6193   | 10033  | 3       |
-| getCollatPrice                     | 19299           | 19299  | 19299  | 19299  | 2       |
-| getPosition                        | 1081            | 1081   | 1081   | 1081   | 6       |
-| initSatoshi                        | 22681           | 22681  | 22681  | 22681  | 15      |
-| liquidatePosition                  | 5830            | 17311  | 15412  | 30692  | 3       |
-| open                               | 495             | 120851 | 127869 | 147769 | 16      |
-| repay                              | 569             | 2606   | 2606   | 4643   | 2       |
-| withdraw                           | 727             | 9929   | 1982   | 27080  | 3       |
+| deposit                            | 6228            | 7508   | 6228   | 10068  | 3       |
+| getCollatPrice                     | 19299           | 19299  | 19299  | 19299  | 7       |
+| getRedemptionRate                  | 5297            | 5312   | 5320   | 5321   | 3       |
+| initSatoshi                        | 22681           | 22681  | 22681  | 22681  | 20      |
+| liquidatePosition                  | 5763            | 17356  | 15513  | 30793  | 3       |
+| open                               | 495             | 122522 | 127869 | 147769 | 21      |
+| redeem                             | 11222           | 22883  | 20860  | 40632  | 5       |
+| repay                              | 613             | 2645   | 2645   | 4678   | 2       |
+| withdraw                           | 816             | 10018  | 2071   | 27169  | 3       |
 
-gas is usually 10 gwei (1 gwei = 1 / 10^9 ETH)
-Deployment cost: 843718 
-Cost of deployment in ETH = (843718 x 10) / 10^9 ETH = 0.00843718 ETH
-Cost of deployment in USD (asumming 2k ETH) = 16.87
 
 | src/SatoshiERC20.sol:Satoshi contract |                 |        |        |        |         |
 |---------------------------------------|-----------------|--------|--------|--------|---------|
@@ -28,17 +26,9 @@ Cost of deployment in USD (asumming 2k ETH) = 16.87
 | 792162                                | 4388            |        |        |        |         |
 | Function Name                         | min             | avg    | median | max    | # calls |
 | approve                               | 24651           | 24651  | 24651  | 24651  | 3       |
-| balanceOf                             | 585             | 960    | 585    | 2585   | 16      |
-| burn                                  | 2386            | 2386   | 2386   | 2386   | 3       |
-| flashloan                             | 136360          | 136360 | 136360 | 136360 | 1       |
-| mint                                  | 46668           | 46668  | 46668  | 46668  | 7       |
+| balanceOf                             | 585             | 1101   | 585    | 2585   | 31      |
+| burn                                  | 2386            | 4576   | 2386   | 19906  | 8       |
+| flashloan                             | 136408          | 136408 | 136408 | 136408 | 1       |
+| mint                                  | 46668           | 46668  | 46668  | 46668  | 11      |
 | transfer                              | 18396           | 20695  | 20695  | 22994  | 2       |
 | transferFrom                          | 22143           | 22143  | 22143  | 22143  | 1       |
-
-Deployment cost: 792162 
-Cost of deployment in ETH = (792162 x 10) / 10^9 ETH = 0.00792162 ETH
-Cost of deployment in USD (asumming 2k ETH) = 15.84
-
-
-
- 
