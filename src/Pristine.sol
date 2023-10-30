@@ -6,6 +6,17 @@ import {AggregatorV3Interface} from "./interfaces/IOracle.sol";
 import {IAaveOracle} from "./interfaces/IAaveOracle.sol";
 import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 
+/**
+   _____  _____  _____  _____ _______ _____ _   _ ______ 
+ |  __ \|  __ \|_   _|/ ____|__   __|_   _| \ | |  ____|
+ | |__) | |__) | | | | (___    | |    | | |  \| | |__   
+ |  ___/|  _  /  | |  \___ \   | |    | | | . ` |  __|  
+ | |    | | \ \ _| |_ ____) |  | |   _| |_| |\  | |____ 
+ |_|    |_|  \_\_____|_____/   |_|  |_____|_| \_|______|
+
+    @title Pristine
+    @author Lempire
+ */
 contract Pristine {
     /*//////////////////////////////////////////////////////////////
                                 STRUCTS
