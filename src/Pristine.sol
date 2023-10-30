@@ -14,7 +14,6 @@ import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
  | |    | | \ \ _| |_ ____) |  | |   _| |_| |\  | |____ 
  |_|    |_|  \_\_____|_____/   |_|  |_____|_| \_|______|
 
-    @title Pristine
     @author Lempire
  */
 contract Pristine {
