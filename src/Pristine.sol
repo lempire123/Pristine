@@ -8,6 +8,16 @@ import {IERC20} from "openzeppelin/token/ERC20/IERC20.sol";
 
 contract Pristine {
     /*//////////////////////////////////////////////////////////////
+                                STRUCTS
+    //////////////////////////////////////////////////////////////*/
+
+    struct Position {
+        address owner;
+        uint256 id;
+        uint256 collatAmount;
+        uint256 borrowedAmount;
+    }
+    /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
 
@@ -21,9 +31,9 @@ contract Pristine {
     uint256 public constant REDEMPTION_RATE_RISKY = 100; // 1.00$
     uint256 public constant REDEMPTION_RATE_MEDIUM = 97; // 0.97$
     uint256 public constant REDEMPTION_RATE_SAFE = 95; // 0.95$
-    ISatoshi public Satoshi;
     address public immutable deployer;
     uint256 public positionCounter; // Support 2^256 positions (more than enough)
+    ISatoshi public Satoshi;
 
     mapping(uint256 => Position) public Positions;
     mapping(address => uint256) public UserPosition;
@@ -62,17 +72,6 @@ contract Pristine {
     error FaultyOracle();
     error NotEnoughCollateral();
     error NotEnoughDebt();
-
-    /*//////////////////////////////////////////////////////////////
-                                STRUCTS
-    //////////////////////////////////////////////////////////////*/
-
-    struct Position {
-        address owner;
-        uint256 id;
-        uint256 collatAmount;
-        uint256 borrowedAmount;
-    }
 
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS

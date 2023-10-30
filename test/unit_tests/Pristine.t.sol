@@ -2,8 +2,8 @@
 pragma solidity ^0.8.13;
 
 import "forge-std/Test.sol";
-import {Pristine} from "../src/Pristine.sol";
-import {Satoshi} from "../src/SatoshiERC20.sol";
+import {Pristine} from "../../src/Pristine.sol";
+import {Satoshi} from "../../src/SatoshiERC20.sol";
 import {IUniswapV2Router02} from "lib/amm/interfaces/IUniswapV2Router02.sol";
 import {FlashloanReceiver} from "src/interfaces/IFlashloanReceiver.sol";
 
