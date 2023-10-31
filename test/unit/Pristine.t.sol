@@ -466,4 +466,24 @@ contract PristineTest is Test {
             satoshi.balanceOf(address(receiver)) / 10 ** 18
         );
     }
+
+    /*//////////////////////////////////////////////////////////////
+                             MISCELLANEOUS
+    //////////////////////////////////////////////////////////////*/
+
+    // function test_Decimals() public {
+    //     vm.startPrank(alice);
+    //     pristine.WBTC().approve(address(pristine), 1);
+    //     uint256 id = pristine.open(1);
+    //     pristine.borrow(1, id);
+    //     (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
+    //         .Positions(id);
+    //     assert(owner == alice);
+    //     assert(_id == 1);
+    //     assert(collat == 1);
+    //     assert(debt == 1);
+    //     vm.stopPrank();
+    //     uint256 redemptionRate = pristine.getRedemptionRate(id);
+    //     assert(redemptionRate == pristine.REDEMPTION_RATE_SAFE());
+    // }
 }

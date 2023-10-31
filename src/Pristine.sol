@@ -27,8 +27,23 @@ contract Pristine {
         uint256 collatAmount;
         uint256 borrowedAmount;
     }
+
     /*//////////////////////////////////////////////////////////////
-                            STATE VARIABLES
+                            NUMERIC CONSTANTS
+    //////////////////////////////////////////////////////////////*/
+
+    uint256 public constant WBTC_DECIMALS = 10 ** 8;
+    uint256 public constant SATOSHI_DECIMALS = 10 ** 18;
+    uint256 public constant MIN_COLLAT_RATIO = 110; // 110%
+    uint256 public constant RISKY_COLLAT_RATIO = 140; // 140%
+    uint256 public constant MEDIUM_COLLAT_RATIO = 180; // 180%
+    uint256 public constant REDEMPTION_RATE_RISKY = 100; // 1.00$
+    uint256 public constant REDEMPTION_RATE_MEDIUM = 97; // 0.97$
+    uint256 public constant REDEMPTION_RATE_SAFE = 95; // 0.95$
+    uint256 public constant CHAINLINK_UPDATE_MAX_DELAY = 1 hours;
+
+    /*//////////////////////////////////////////////////////////////
+                           EXTERNAL CONTRACTS
     //////////////////////////////////////////////////////////////*/
 
     address public constant PRICE_FEED_ADDRESS =
@@ -37,13 +52,18 @@ contract Pristine {
         0xAC4A2aC76D639E10f2C05a41274c1aF85B772598;
     IERC20 public constant WBTC =
         IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
-    uint256 public constant MIN_COLLAT_RATIO = 110; // 110%
-    uint256 public constant REDEMPTION_RATE_RISKY = 100; // 1.00$
-    uint256 public constant REDEMPTION_RATE_MEDIUM = 97; // 0.97$
-    uint256 public constant REDEMPTION_RATE_SAFE = 95; // 0.95$
+
+    /*//////////////////////////////////////////////////////////////
+                            STATE VARIABLES
+    //////////////////////////////////////////////////////////////*/
+
     address public immutable deployer;
-    uint256 public positionCounter; // Support 2^256 positions (more than enough)
+    uint256 public positionCounter; // Supports 2^256 positions (more than enough)
     ISatoshi public Satoshi;
+
+    /*//////////////////////////////////////////////////////////////
+                                MAPPINGS
+    //////////////////////////////////////////////////////////////*/
 
     mapping(uint256 => Position) public Positions;
     mapping(address => uint256) public UserPosition;
@@ -247,8 +267,8 @@ contract Pristine {
     function checkPositionHealth(uint256 _id) public view returns (bool) {
         Position memory position = Positions[_id];
         uint256 collateralValue = (position.collatAmount * getCollatPrice()) /
-            10 ** 8;
-        uint256 borrowedValue = position.borrowedAmount / 10 ** 18;
+            WBTC_DECIMALS;
+        uint256 borrowedValue = position.borrowedAmount / SATOSHI_DECIMALS;
         if (borrowedValue == 0) return true;
 
         return (collateralValue * 100) / borrowedValue >= MIN_COLLAT_RATIO;
@@ -256,7 +276,7 @@ contract Pristine {
 
     // @notice - Gets the price of WBTC in USD
     // @dev - Uses chainlink as primary oracle, Aave as secondary
-    // Importantly, returns the price normalized to 10 ** 8
+    // Importantly, returns the price normalized to WBTC_DECIMALS
     function getCollatPrice() public view returns (uint256) {
         AggregatorV3Interface priceFeed = AggregatorV3Interface(
             PRICE_FEED_ADDRESS
@@ -264,8 +284,11 @@ contract Pristine {
         (, int price, , uint timestamp, ) = priceFeed.latestRoundData();
         uint256 chainlinkPrice = uint256(price);
 
-        if (chainlinkPrice > 0 && block.timestamp - timestamp <= 1 hours) {
-            return chainlinkPrice / 10 ** 8;
+        if (
+            chainlinkPrice > 0 &&
+            block.timestamp - timestamp <= CHAINLINK_UPDATE_MAX_DELAY
+        ) {
+            return chainlinkPrice / WBTC_DECIMALS;
         } else {
             uint256 aavePrice = IAaveOracle(AAVE_ORACLE).getAssetPrice(
                 address(WBTC)
@@ -273,22 +296,23 @@ contract Pristine {
 
             if (aavePrice == 0) revert FaultyOracle();
 
-            return aavePrice / 10 ** 8;
+            return aavePrice / WBTC_DECIMALS;
         }
     }
 
     // Helper function to determine the redemption rate based on the collateral ratio
     function getRedemptionRate(uint256 _id) public view returns (uint256) {
         uint256 collatValue = (Positions[_id].collatAmount * getCollatPrice()) /
-            10 ** 8;
-        uint256 borrowedValue = Positions[_id].borrowedAmount / 10 ** 18;
+            WBTC_DECIMALS;
+        uint256 borrowedValue = Positions[_id].borrowedAmount /
+            SATOSHI_DECIMALS;
         uint256 collatRatio = (borrowedValue == 0)
             ? 0
             : (collatValue * 100) / borrowedValue;
 
-        if (collatRatio >= 180) {
+        if (collatRatio >= MEDIUM_COLLAT_RATIO) {
             return REDEMPTION_RATE_SAFE;
-        } else if (collatRatio >= 140) {
+        } else if (collatRatio >= RISKY_COLLAT_RATIO) {
             return REDEMPTION_RATE_MEDIUM;
         } else {
             return REDEMPTION_RATE_RISKY;
