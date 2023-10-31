@@ -365,7 +365,7 @@ contract PristineTest is Test {
         bytes memory encodedError = abi.encodeWithSelector(selector, id);
 
         vm.expectRevert(encodedError);
-        pristine.liquidatePosition(1);
+        pristine.liquidatePosition(1, 1000 * 10 ** 18);
         vm.stopPrank();
     }
 
@@ -394,7 +394,7 @@ contract PristineTest is Test {
         uint256 btcBalanceBefore = pristine.WBTC().balanceOf(address(bob));
         satoshi.approve(address(pristine), type(uint256).max);
         deal(address(satoshi), bob, 40_000 * 10 ** 18);
-        pristine.liquidatePosition(1);
+        pristine.liquidatePosition(1, 40_000 * 10 ** 18);
         uint256 btcBalanceAfter = pristine.WBTC().balanceOf(address(bob));
         uint256 satoshiBalanceAfter = satoshi.balanceOf(address(bob));
 
@@ -406,11 +406,11 @@ contract PristineTest is Test {
         // Hey at least alice still has 40k, not bad
         assert(satoshi.balanceOf(address(alice)) == 40_000 * 10 ** 18);
 
-        bytes4 selector = Pristine.PositionNotFound.selector;
-        bytes memory encodedError = abi.encodeWithSelector(selector, id);
+        bytes4 selector = Pristine.NotEnoughCollateral.selector;
+        bytes memory encodedError = abi.encodeWithSelector(selector);
         // Now alice tries to withdraw collat - fail
         vm.expectRevert(encodedError);
-        pristine.repay(40_000 * 10 ** 18, id);
+        pristine.withdraw(40_000 * 10 ** 18, id);
         vm.stopPrank();
     }
 
@@ -454,16 +454,17 @@ contract PristineTest is Test {
 
         assert(!pristine.checkPositionHealth(id));
 
-        bytes[] memory data = new bytes[](3);
+        bytes[] memory data = new bytes[](4);
         data[0] = abi.encode(id);
-        data[1] = abi.encode(address(pristine));
-        data[2] = abi.encode(address(router));
+        data[1] = abi.encode(borrowAmount);
+        data[2] = abi.encode(address(pristine));
+        data[3] = abi.encode(address(router));
         receiver.flashloan(address(satoshi), borrowAmount, data);
         receiver.withdraw(address(satoshi));
         assert(satoshi.balanceOf(address(this)) > 0); // Asserting any profit
         emit log_named_uint(
             "liquidation profit",
-            satoshi.balanceOf(address(receiver)) / 10 ** 18
+            satoshi.balanceOf(address(receiver))
         );
     }
 

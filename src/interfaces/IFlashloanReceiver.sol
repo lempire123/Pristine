@@ -26,10 +26,11 @@ contract FlashloanReceiver {
     function execute(bytes[] memory data) external {
         // parse bytes
         uint256 id = abi.decode(data[0], (uint256));
-        address pristine = abi.decode(data[1], (address));
-        address router = abi.decode(data[2], (address));
+        uint256 debtAmount = abi.decode(data[1], (uint256));
+        address pristine = abi.decode(data[2], (address));
+        address router = abi.decode(data[3], (address));
         // liquidate
-        Pristine(pristine).liquidatePosition(id);
+        Pristine(pristine).liquidatePosition(id, debtAmount);
         address[] memory path = new address[](2);
         path[0] = address(Pristine(pristine).WBTC());
         path[1] = address(Pristine(pristine).Satoshi());

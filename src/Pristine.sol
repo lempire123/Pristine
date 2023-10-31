@@ -208,6 +208,7 @@ contract Pristine {
         uint256 _amount,
         uint256 _id
     ) public PositionExists(_id) onlyOwner(_id) {
+        if (_amount > Positions[_id].collatAmount) revert NotEnoughCollateral();
         WBTC.transfer(msg.sender, _amount);
         Positions[_id].collatAmount -= _amount;
         if (!checkPositionHealth(_id)) revert PositionNotHealthy(_id);
@@ -215,20 +216,35 @@ contract Pristine {
         emit Withdrew(_id, _amount);
     }
 
-    // @notice - liquidates an unhealthy position
-    // @dev - Transfers the amount of WBTC to the caller
-    // @param _id - The id of the position to be liquidates
-    function liquidatePosition(uint256 _id) public PositionExists(_id) {
+    // @notice - liquidates a part or all of an unhealthy position
+    // @dev - Transfers the proportional amount of WBTC to the caller
+    // @param _id - The id of the position to be liquidated
+    // @param _debtAmount - The amount of debt to be repaid
+    function liquidatePosition(
+        uint256 _id,
+        uint256 _debtAmount
+    ) public PositionExists(_id) {
         if (checkPositionHealth(_id)) revert PositionHealthy(_id);
+
         Position memory position = Positions[_id];
-        Satoshi.burn(msg.sender, position.borrowedAmount);
-        WBTC.transfer(msg.sender, position.collatAmount);
 
-        //Update Positions
-        delete Positions[_id];
-        delete UserPosition[position.owner];
+        if (_debtAmount > position.borrowedAmount) revert NotEnoughDebt();
 
-        emit Liquidated(_id, position.collatAmount);
+        uint256 collatToTransfer = (_debtAmount * position.collatAmount) /
+            position.borrowedAmount;
+
+        if (collatToTransfer > position.collatAmount)
+            revert NotEnoughCollateral();
+
+        position.borrowedAmount -= _debtAmount;
+        position.collatAmount -= collatToTransfer;
+
+        // Transfer the funds
+        Satoshi.burn(msg.sender, _debtAmount);
+        WBTC.transfer(msg.sender, collatToTransfer);
+
+        Positions[_id] = position;
+        emit Liquidated(_id, collatToTransfer);
     }
 
     // @notice - Redeems Satoshi for WBTC from a specified position
