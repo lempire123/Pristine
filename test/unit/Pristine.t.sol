@@ -438,23 +438,11 @@ contract PristineTest is Test {
         pristine.liquidatePosition(id, liquidationAmount); // Partial liquidation
 
         (, , uint256 collat, uint256 debt) = pristine.Positions(id);
-        console.log("Collat", collat);
-        console.log("Debt", debt);
-        console.log("Prior Collat", priorCollat);
-        console.log("Prior Debt", priorDebt);
-        console.log("Liquidation Amount", liquidationAmount);
 
         assert(collat == priorCollat - btcReceived);
         assert(debt == priorDebt - liquidationAmount);
 
-        // Bob checks his balances
         uint256 btcBalance = pristine.WBTC().balanceOf(address(bob));
-        uint256 satoshiBalance = satoshi.balanceOf(address(bob));
-
-        // Assuming Bob receives 10 BTC and spends 1000 Satoshi in the liquidation
-        // assert(btcBalance == btcReceived);
-        console.log(btcBalance);
-        console.log(bobBTCBalanceBefore + btcReceived);
         assert(btcBalance == bobBTCBalanceBefore + btcReceived);
 
         vm.stopPrank();
@@ -535,19 +523,19 @@ contract PristineTest is Test {
                              MISCELLANEOUS
     //////////////////////////////////////////////////////////////*/
 
-    // function test_Decimals() public {
-    //     vm.startPrank(alice);
-    //     pristine.WBTC().approve(address(pristine), 1);
-    //     uint256 id = pristine.open(1);
-    //     pristine.borrow(1, id);
-    //     (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
-    //         .Positions(id);
-    //     assert(owner == alice);
-    //     assert(_id == 1);
-    //     assert(collat == 1);
-    //     assert(debt == 1);
-    //     vm.stopPrank();
-    //     uint256 redemptionRate = pristine.getRedemptionRate(id);
-    //     assert(redemptionRate == pristine.REDEMPTION_RATE_SAFE());
-    // }
+    function test_Decimals() public {
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), 1);
+        uint256 id = pristine.open(1);
+        pristine.borrow(1, id);
+        (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
+            .Positions(id);
+        assert(owner == alice);
+        assert(_id == 1);
+        assert(collat == 1);
+        assert(debt == 1);
+        vm.stopPrank();
+        uint256 redemptionRate = pristine.getRedemptionRate(id);
+        assert(redemptionRate == pristine.REDEMPTION_RATE_SAFE());
+    }
 }
