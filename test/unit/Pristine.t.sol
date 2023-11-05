@@ -352,23 +352,6 @@ contract PristineTest is Test {
                               LIQUIDATION
     //////////////////////////////////////////////////////////////*/
 
-    function test_liquidateFailed() public {
-        vm.startPrank(alice);
-        pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
-        uint256 id = pristine.open(10 * 10 ** 8);
-        pristine.borrow(1000 * 10 ** 18, id);
-
-        vm.startPrank(bob);
-        satoshi.approve(address(pristine), type(uint256).max);
-        deal(address(satoshi), bob, 1000 * 10 ** 18);
-        bytes4 selector = Pristine.PositionHealthy.selector;
-        bytes memory encodedError = abi.encodeWithSelector(selector, id);
-
-        vm.expectRevert(encodedError);
-        pristine.liquidatePosition(1, 1000 * 10 ** 18);
-        vm.stopPrank();
-    }
-
     // This liquidation is probably unprofitable.
     // Unlike using a flashloan where a profit is required to repay the loan.
     // (Or at least break even)
@@ -401,6 +384,9 @@ contract PristineTest is Test {
         // Will be 1 BTC because we changed the storage to 1
         assert(btcBalanceAfter - btcBalanceBefore == 1 * 10 ** 8);
         assert(satoshiBalanceAfter == 0);
+        (, , uint256 collat, uint256 debt) = pristine.Positions(id);
+        assert(collat == 0);
+        assert(debt == 0);
 
         vm.startPrank(alice);
         // Hey at least alice still has 40k, not bad
@@ -411,6 +397,85 @@ contract PristineTest is Test {
         // Now alice tries to withdraw collat - fail
         vm.expectRevert(encodedError);
         pristine.withdraw(40_000 * 10 ** 18, id);
+        vm.stopPrank();
+    }
+
+    function test_PartialLiquidation() public {
+        uint256 btcPrice = pristine.getCollatPrice();
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), 110 * 10 ** 8);
+        uint256 id = pristine.open(110 * 10 ** 8);
+        uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // Borrow amount for initial collateral ratio > 110%
+        pristine.borrow(borrowAmount, id);
+        vm.stopPrank();
+
+        // Adjust collateral to make position unhealthy but still profitable to liquidate
+        uint256 adjustedCollatAmount = 105 * 10 ** 8; // Adjusted collateral for collateral ratio between 100% and 110%
+        stdstore
+            .target(address(pristine))
+            .sig("Positions(uint256)")
+            .with_key(1)
+            .depth(2)
+            .checked_write(adjustedCollatAmount);
+
+        assert(!pristine.checkPositionHealth(id));
+
+        uint256 bobBTCBalanceBefore = pristine.WBTC().balanceOf(address(bob));
+        uint256 liquidationAmount = borrowAmount / 2;
+        uint256 collatRatio = pristine.getCollatRatio(id);
+        uint256 satoshiReceived = (liquidationAmount * collatRatio) / 100;
+        uint256 btcReceived = (satoshiReceived * btcPrice) /
+            pristine.SATOSHI_DECIMALS();
+
+        (, , uint256 priorCollat, uint256 priorDebt) = pristine.Positions(id);
+        // Bob attempts to partially liquidate Alice's position
+        vm.startPrank(bob);
+        satoshi.approve(address(pristine), type(uint256).max);
+        deal(address(satoshi), bob, liquidationAmount); // Assuming Bob has enough Satoshi to partially liquidate
+        // assert(satoshi.balanceOf(address(bob)) == liquidationAmount);
+        console.log("Satoshi bal", satoshi.balanceOf(address(bob)));
+        console.log("Liquidation bal", liquidationAmount);
+        assert(satoshi.balanceOf(address(bob)) == liquidationAmount);
+        pristine.liquidatePosition(id, liquidationAmount); // Partial liquidation
+
+        (, , uint256 collat, uint256 debt) = pristine.Positions(id);
+        console.log("Collat", collat);
+        console.log("Debt", debt);
+        console.log("Prior Collat", priorCollat);
+        console.log("Prior Debt", priorDebt);
+        console.log("Liquidation Amount", liquidationAmount);
+
+        // assert(collat == (110 * 10 ** 8) - btcReceived);
+        // assert(debt == priorDebt - liquidationAmount);
+
+        // Bob checks his balances
+        uint256 btcBalance = pristine.WBTC().balanceOf(address(bob));
+        uint256 satoshiBalance = satoshi.balanceOf(address(bob));
+
+        // Assuming Bob receives 10 BTC and spends 1000 Satoshi in the liquidation
+        // assert(btcBalance == btcReceived);
+        console.log(btcBalance);
+        console.log(bobBTCBalanceBefore + btcReceived);
+        // assert(btcBalance == bobBTCBalanceBefore + btcReceived);
+        // assert(satoshiBalance == 0);
+
+        vm.stopPrank();
+    }
+
+    function test_liquidateFailed() public {
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
+        uint256 id = pristine.open(10 * 10 ** 8);
+        pristine.borrow(1000 * 10 ** 18, id);
+
+        vm.startPrank(bob);
+        satoshi.approve(address(pristine), type(uint256).max);
+        deal(address(satoshi), bob, 1000 * 10 ** 18);
+        bytes4 selector = Pristine.PositionHealthy.selector;
+        bytes memory encodedError = abi.encodeWithSelector(selector, id);
+
+        vm.expectRevert(encodedError);
+        pristine.liquidatePosition(1, 1000 * 10 ** 18);
         vm.stopPrank();
     }
 

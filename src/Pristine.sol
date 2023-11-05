@@ -47,7 +47,7 @@ contract Pristine {
     //////////////////////////////////////////////////////////////*/
 
     address public constant PRICE_FEED_ADDRESS =
-        0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c; // Chainlink Price Feed address on Ethereum Mainnet
+        0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c;
     address public constant AAVE_ORACLE =
         0xAC4A2aC76D639E10f2C05a41274c1aF85B772598;
     IERC20 public constant WBTC =
@@ -58,7 +58,7 @@ contract Pristine {
     //////////////////////////////////////////////////////////////*/
 
     address public immutable deployer;
-    uint256 public positionCounter; // Supports 2^256 positions (more than enough)
+    uint256 public positionCounter;
     ISatoshi public Satoshi;
 
     /*//////////////////////////////////////////////////////////////
@@ -230,11 +230,14 @@ contract Pristine {
 
         if (_debtAmount > position.borrowedAmount) revert NotEnoughDebt();
 
-        uint256 collatToTransfer = (_debtAmount * position.collatAmount) /
-            position.borrowedAmount;
+        uint256 collatRatio = getCollatRatio(_id);
+        // uint256 collatToTransfer = (_debtAmount * collatRatio) / 100;
+        uint256 collatToTransfer = (_debtAmount / position.borrowedAmount) *
+            position.collatAmount;
 
-        if (collatToTransfer > position.collatAmount)
-            revert NotEnoughCollateral();
+        if (collatToTransfer > position.collatAmount) {
+            collatToTransfer = position.collatAmount;
+        }
 
         position.borrowedAmount -= _debtAmount;
         position.collatAmount -= collatToTransfer;
@@ -281,13 +284,18 @@ contract Pristine {
     // @dev - Returns true if the position is healthy, false otherwise
     // @param _id - The id of the position to be checked
     function checkPositionHealth(uint256 _id) public view returns (bool) {
+        if (Positions[_id].borrowedAmount == 0) return true; // If there is no collateral, the position is unhealthy
+        return getCollatRatio(_id) >= MIN_COLLAT_RATIO;
+    }
+
+    function getCollatRatio(uint256 _id) public view returns (uint256) {
         Position memory position = Positions[_id];
+        if (position.borrowedAmount == 0) return 0;
         uint256 collateralValue = (position.collatAmount * getCollatPrice()) /
             WBTC_DECIMALS;
         uint256 borrowedValue = position.borrowedAmount / SATOSHI_DECIMALS;
-        if (borrowedValue == 0) return true;
 
-        return (collateralValue * 100) / borrowedValue >= MIN_COLLAT_RATIO;
+        return (collateralValue * 100) / borrowedValue;
     }
 
     // @notice - Gets the price of WBTC in USD
@@ -317,6 +325,9 @@ contract Pristine {
     }
 
     // Helper function to determine the redemption rate based on the collateral ratio
+    // @notice Returns the redemption rate based on the health of the position
+    // @dev The rates are based on hardcoded values
+    // @param _id Position id
     function getRedemptionRate(uint256 _id) public view returns (uint256) {
         uint256 collatValue = (Positions[_id].collatAmount * getCollatPrice()) /
             WBTC_DECIMALS;
