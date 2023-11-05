@@ -1,4 +1,4 @@
-![Pristine Logo](./assets/PristineLogo.png)
+![Pristine Logo](./assets/PristineGod.png)
 # **Pristine**: Stablecoin Backed by Bitcoin
 
 Inspired by Liquity, a decentralized finance (DeFi) application I frequently use to borrow funds against my Ethereum holdings, Pristine aims to bring a robust and user-friendly borrowing experience to the Bitcoin ecosystem.
