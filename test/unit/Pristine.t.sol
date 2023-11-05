@@ -424,8 +424,7 @@ contract PristineTest is Test {
         uint256 liquidationAmount = borrowAmount / 2;
         uint256 collatRatio = pristine.getCollatRatio(id);
         uint256 satoshiReceived = (liquidationAmount * collatRatio) / 100;
-        uint256 btcReceived = (satoshiReceived * btcPrice) /
-            pristine.SATOSHI_DECIMALS();
+        uint256 btcReceived = satoshiReceived / (10 ** 10 * btcPrice);
 
         (, , uint256 priorCollat, uint256 priorDebt) = pristine.Positions(id);
         // Bob attempts to partially liquidate Alice's position
@@ -445,8 +444,8 @@ contract PristineTest is Test {
         console.log("Prior Debt", priorDebt);
         console.log("Liquidation Amount", liquidationAmount);
 
-        // assert(collat == (110 * 10 ** 8) - btcReceived);
-        // assert(debt == priorDebt - liquidationAmount);
+        assert(collat == priorCollat - btcReceived);
+        assert(debt == priorDebt - liquidationAmount);
 
         // Bob checks his balances
         uint256 btcBalance = pristine.WBTC().balanceOf(address(bob));
@@ -456,8 +455,7 @@ contract PristineTest is Test {
         // assert(btcBalance == btcReceived);
         console.log(btcBalance);
         console.log(bobBTCBalanceBefore + btcReceived);
-        // assert(btcBalance == bobBTCBalanceBefore + btcReceived);
-        // assert(satoshiBalance == 0);
+        assert(btcBalance == bobBTCBalanceBefore + btcReceived);
 
         vm.stopPrank();
     }

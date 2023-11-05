@@ -232,8 +232,8 @@ contract Pristine {
 
         uint256 collatRatio = getCollatRatio(_id);
         // uint256 collatToTransfer = (_debtAmount * collatRatio) / 100;
-        uint256 collatToTransfer = (_debtAmount / position.borrowedAmount) *
-            position.collatAmount;
+        uint256 collatToTransfer = (_debtAmount * position.collatAmount) /
+            position.borrowedAmount;
 
         if (collatToTransfer > position.collatAmount) {
             collatToTransfer = position.collatAmount;
