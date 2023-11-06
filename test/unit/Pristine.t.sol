@@ -509,10 +509,10 @@ contract PristineTest is Test {
         receiver.flashloan(address(satoshi), borrowAmount, data);
         receiver.withdraw(address(satoshi));
         assert(satoshi.balanceOf(address(this)) > 0); // Asserting any profit
-        emit log_named_uint(
-            "liquidation profit",
-            satoshi.balanceOf(address(this)) / 10 ** 18
-        );
+        // emit log_named_uint(
+        //     "liquidation profit",
+        //     satoshi.balanceOf(address(this)) / 10 ** 18
+        // );
     }
 
     /*//////////////////////////////////////////////////////////////
