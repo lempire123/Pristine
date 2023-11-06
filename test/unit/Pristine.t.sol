@@ -427,16 +427,12 @@ contract PristineTest is Test {
         uint256 btcReceived = satoshiReceived / (10 ** 10 * btcPrice);
 
         (, , uint256 priorCollat, uint256 priorDebt) = pristine.Positions(id);
-        // Bob attempts to partially liquidate Alice's position
+
         vm.startPrank(bob);
         satoshi.approve(address(pristine), type(uint256).max);
-        deal(address(satoshi), bob, liquidationAmount); // Assuming Bob has enough Satoshi to partially liquidate
-        // assert(satoshi.balanceOf(address(bob)) == liquidationAmount);
-        console.log("Satoshi bal", satoshi.balanceOf(address(bob)));
-        console.log("Liquidation bal", liquidationAmount);
+        deal(address(satoshi), bob, liquidationAmount);
         assert(satoshi.balanceOf(address(bob)) == liquidationAmount);
-        pristine.liquidatePosition(id, liquidationAmount); // Partial liquidation
-
+        pristine.liquidatePosition(id, liquidationAmount);
         (, , uint256 collat, uint256 debt) = pristine.Positions(id);
 
         assert(collat == priorCollat - btcReceived);
@@ -515,7 +511,7 @@ contract PristineTest is Test {
         assert(satoshi.balanceOf(address(this)) > 0); // Asserting any profit
         emit log_named_uint(
             "liquidation profit",
-            satoshi.balanceOf(address(receiver))
+            satoshi.balanceOf(address(this)) / 10 ** 18
         );
     }
 
