@@ -81,6 +81,11 @@ contract Pristine {
     event Borrowed(uint256 indexed id, uint256 borrowedAmount);
     event Repayed(uint256 indexed id, uint256 repaidAmount);
     event Withdrew(uint256 indexed id, uint256 collatAmount);
+    event PositionTransferred(
+        uint256 indexed id,
+        address indexed from,
+        address indexed to
+    );
     event Liquidated(uint256 indexed id, uint256 collatAmount);
     event Redeemed(
         uint256 indexed id,
@@ -102,6 +107,8 @@ contract Pristine {
     error FaultyOracle();
     error NotEnoughCollateral();
     error NotEnoughDebt();
+    error SameOwner();
+    error InvalidAddress();
 
     /*//////////////////////////////////////////////////////////////
                                MODIFIERS
@@ -215,6 +222,26 @@ contract Pristine {
         if (!checkPositionHealth(_id)) revert PositionNotHealthy(_id);
 
         emit Withdrew(_id, _amount);
+    }
+
+    // @notice - Transfers ownership of a position to a new address
+    // @dev - Only the owner of the position can call this function
+    // @param _id - The id of the position to be transferred
+    // @param _newOwner - The address of the new owner
+    function transferPosition(
+        uint256 _id,
+        address _newOwner
+    ) public PositionExists(_id) onlyOwner(_id) {
+        if (_newOwner == address(0)) revert InvalidAddress();
+        if (_newOwner == address(0)) revert SameOwner();
+
+        Positions[_id].owner = _newOwner;
+
+        // If you keep the UserPosition mapping, update that as well
+        UserPosition[_newOwner] = _id;
+        UserPosition[msg.sender] = 0;
+
+        emit PositionTransferred(_id, msg.sender, _newOwner);
     }
 
     // @notice - liquidates a part or all of an unhealthy position

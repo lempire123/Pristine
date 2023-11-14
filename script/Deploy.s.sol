@@ -7,9 +7,12 @@ import {Satoshi} from "../src/SatoshiERC20.sol";
 
 contract DeployScript is Script {
     function run() public {
-        vm.broadcast();
+        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        vm.startBroadcast(deployerPrivateKey);
 
         Pristine pristine = new Pristine();
-        new Satoshi(address(pristine));
+        Satoshi satoshi = new Satoshi(address(pristine));
+
+        vm.stopBroadcast();
     }
 }

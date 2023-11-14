@@ -1,23 +1,26 @@
 | src/Pristine.sol:Pristine contract |                 |        |        |        |         |
 |------------------------------------|-----------------|--------|--------|--------|---------|
 | Deployment Cost                    | Deployment Size |        |        |        |         |
-| 1107588                            | 5587            |        |        |        |         |
+| 1170855                            | 5903            |        |        |        |         |
 | Function Name                      | min             | avg    | median | max    | # calls |
 | MIN_COLLAT_RATIO                   | 307             | 307    | 307    | 307    | 1       |
-| Positions                          | 981             | 981    | 981    | 981    | 19      |
-| Satoshi                            | 371             | 704    | 371    | 2371   | 6       |
-| WBTC                               | 251             | 251    | 251    | 251    | 72      |
-| borrow                             | 751             | 77330  | 79317  | 94317  | 12      |
-| checkPositionHealth                | 5548            | 5548   | 5548   | 5548   | 2       |
+| Positions                          | 981             | 981    | 981    | 981    | 30      |
+| REDEMPTION_RATE_SAFE               | 284             | 284    | 284    | 284    | 1       |
+| Satoshi                            | 393             | 726    | 393    | 2393   | 6       |
+| WBTC                               | 251             | 251    | 251    | 251    | 83      |
+| borrow                             | 751             | 79977  | 79584  | 94584  | 15      |
+| checkPositionHealth                | 5815            | 5815   | 5815   | 5815   | 3       |
 | deposit                            | 6193            | 7473   | 6193   | 10033  | 3       |
-| getCollatPrice                     | 19365           | 19365  | 19365  | 19365  | 7       |
-| getRedemptionRate                  | 5298            | 5313   | 5321   | 5322   | 3       |
-| initSatoshi                        | 22682           | 22682  | 22682  | 22682  | 20      |
-| liquidatePosition                  | 5809            | 17568  | 15808  | 31088  | 3       |
-| open                               | 561             | 122577 | 127923 | 147823 | 21      |
-| redeem                             | 11187           | 22847  | 20824  | 40596  | 5       |
+| getCollatPrice                     | 19365           | 19365  | 19365  | 19365  | 8       |
+| getCollatRatio                     | 5544            | 5544   | 5544   | 5544   | 1       |
+| getRedemptionRate                  | 5664            | 5675   | 5675   | 5688   | 4       |
+| initSatoshi                        | 22717           | 22717  | 22717  | 22717  | 23      |
+| liquidatePosition                  | 6098            | 17374  | 16040  | 31320  | 4       |
+| open                               | 561             | 123245 | 127923 | 147823 | 24      |
+| redeem                             | 11463           | 23123  | 21100  | 40872  | 5       |
 | repay                              | 4634            | 4634   | 4634   | 4634   | 1       |
-| withdraw                           | 772             | 7513   | 976    | 27329  | 4       |
+| transferPosition                   | 20399           | 20399  | 20399  | 20399  | 1       |
+| withdraw                           | 772             | 2563   | 976    | 7528   | 4       |
 
 
 | src/SatoshiERC20.sol:Satoshi contract |                 |        |        |        |         |
@@ -25,11 +28,11 @@
 | Deployment Cost                       | Deployment Size |        |        |        |         |
 | 792162                                | 4388            |        |        |        |         |
 | Function Name                         | min             | avg    | median | max    | # calls |
-| approve                               | 24651           | 24651  | 24651  | 24651  | 3       |
-| balanceOf                             | 585             | 1101   | 585    | 2585   | 31      |
-| burn                                  | 2386            | 4576   | 2386   | 19906  | 8       |
-| flashloan                             | 137996          | 137996 | 137996 | 137996 | 1       |
-| mint                                  | 46668           | 46668  | 46668  | 46668  | 11      |
+| approve                               | 24651           | 24651  | 24651  | 24651  | 4       |
+| balanceOf                             | 585             | 1114   | 585    | 2585   | 34      |
+| burn                                  | 2386            | 4332   | 2386   | 19906  | 9       |
+| flashloan                             | 138245          | 138245 | 138245 | 138245 | 1       |
+| mint                                  | 46668           | 46668  | 46668  | 46668  | 14      |
 | transfer                              | 18396           | 20695  | 20695  | 22994  | 2       |
 | transferFrom                          | 22143           | 22143  | 22143  | 22143  | 1       |
 

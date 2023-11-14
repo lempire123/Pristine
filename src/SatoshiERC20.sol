@@ -4,12 +4,12 @@ pragma solidity ^0.8.13;
 import {ERC20} from "openzeppelin/token/ERC20/ERC20.sol";
 
 contract Satoshi is ERC20 {
+    address public immutable pristine;
+
     modifier onlyPristine() {
         require(msg.sender == pristine);
         _;
     }
-
-    address public immutable pristine;
 
     constructor(address _pristine) ERC20("Satoshi", "STS") {
         pristine = _pristine;

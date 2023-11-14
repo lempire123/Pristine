@@ -69,6 +69,7 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == 10 * 10 ** 8);
         assert(debt == 1000 * 10 ** 18);
+        assert(satoshi.balanceOf(alice) == 1000 * 10 ** 18);
         vm.stopPrank();
     }
 
@@ -116,6 +117,26 @@ contract PristineTest is Test {
         assert(_id == 1);
         assert(collat == 10 * 10 ** 8);
         assert(debt == 0);
+        vm.stopPrank();
+    }
+
+    function test_TransferPosition() public {
+        vm.startPrank(alice);
+        pristine.WBTC().approve(address(pristine), 10 * 10 ** 8);
+        uint256 id = pristine.open(10 * 10 ** 8);
+        pristine.borrow(1000 * 10 ** 18, id);
+        (address owner, uint256 _id, uint256 collat, uint256 debt) = pristine
+            .Positions(id);
+        assert(owner == alice);
+        assert(_id == 1);
+        assert(collat == 10 * 10 ** 8);
+        assert(debt == 1000 * 10 ** 18);
+        pristine.transferPosition(id, bob);
+        (owner, _id, collat, debt) = pristine.Positions(id);
+        assert(owner == bob);
+        assert(_id == 1);
+        assert(collat == 10 * 10 ** 8);
+        assert(debt == 1000 * 10 ** 18);
         vm.stopPrank();
     }
 
