@@ -49,7 +49,7 @@ contract Pristine {
     address public constant PRICE_FEED_ADDRESS =
         0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c;
     address public constant AAVE_ORACLE =
-        0xAC4A2aC76D639E10f2C05a41274c1aF85B772598;
+        0x54586bE62E3c3580375aE3723C145253060Ca0C2;
     IERC20 public constant WBTC =
         IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
 
