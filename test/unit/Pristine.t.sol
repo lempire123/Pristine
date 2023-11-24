@@ -424,8 +424,8 @@ contract PristineTest is Test {
     function test_PartialLiquidation() public {
         uint256 btcPrice = pristine.getCollatPrice();
         vm.startPrank(alice);
-        pristine.WBTC().approve(address(pristine), 110 * 10 ** 8);
-        uint256 id = pristine.open(110 * 10 ** 8);
+        pristine.WBTC().approve(address(pristine), 120 * 10 ** 8);
+        uint256 id = pristine.open(120 * 10 ** 8);
         uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // Borrow amount for initial collateral ratio > 110%
         pristine.borrow(borrowAmount, id);
         vm.stopPrank();
@@ -505,8 +505,8 @@ contract PristineTest is Test {
         receiver = new FlashloanReceiver();
 
         vm.startPrank(alice);
-        pristine.WBTC().approve(address(pristine), 110 * 10 ** 8);
-        uint256 id = pristine.open(110 * 10 ** 8);
+        pristine.WBTC().approve(address(pristine), 120 * 10 ** 8);
+        uint256 id = pristine.open(120 * 10 ** 8);
         uint256 borrowAmount = (100 * btcPrice * 10 ** 18); // Borrow amount for initial collateral ratio > 110%
         pristine.borrow(borrowAmount, id);
         vm.stopPrank();

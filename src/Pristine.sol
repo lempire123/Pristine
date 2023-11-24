@@ -34,7 +34,7 @@ contract Pristine {
 
     uint256 public constant WBTC_DECIMALS = 10 ** 8;
     uint256 public constant SATOSHI_DECIMALS = 10 ** 18;
-    uint256 public constant MIN_COLLAT_RATIO = 110; // 110%
+    uint256 public constant MIN_COLLAT_RATIO = 120; // 110%
     uint256 public constant RISKY_COLLAT_RATIO = 140; // 140%
     uint256 public constant MEDIUM_COLLAT_RATIO = 180; // 180%
     uint256 public constant REDEMPTION_RATE_RISKY = 100; // 1.00$
