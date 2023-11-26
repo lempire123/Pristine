@@ -46,12 +46,15 @@ contract Pristine {
                            EXTERNAL CONTRACTS
     //////////////////////////////////////////////////////////////*/
 
-    address public constant PRICE_FEED_ADDRESS =
-        0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c;
-    address public constant AAVE_ORACLE =
-        0x54586bE62E3c3580375aE3723C145253060Ca0C2;
-    IERC20 public constant WBTC =
-        IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
+    // address public constant PRICE_FEED_ADDRESS =
+    //     0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c;
+    // address public constant AAVE_ORACLE =
+    //     0x54586bE62E3c3580375aE3723C145253060Ca0C2;
+    // IERC20 public constant WBTC =
+    //     IERC20(0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599);
+    address public immutable PRICE_FEED_ADDRESS;
+    address public immutable AAVE_ORACLE;
+    IERC20 public immutable WBTC;
 
     /*//////////////////////////////////////////////////////////////
                             STATE VARIABLES
@@ -139,8 +142,11 @@ contract Pristine {
     //////////////////////////////////////////////////////////////*/
     // @notice - Sets the owner of the contract to the deployer
     // @dev - Owner's power is limited to setting the address of the Satoshi contract
-    constructor() {
+    constructor(address _WBTC, address _priceFeedAddress, address _aaveOracle) {
         deployer = msg.sender;
+        WBTC = IERC20(_WBTC);
+        PRICE_FEED_ADDRESS = _priceFeedAddress;
+        AAVE_ORACLE = _aaveOracle;
     }
 
     /*//////////////////////////////////////////////////////////////

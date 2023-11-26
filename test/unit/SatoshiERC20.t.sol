@@ -14,10 +14,13 @@ contract SatoshiTest is Test {
     FlashloanReceiver public receiver;
     address public alice;
     address public bob;
+    address public WBTC = vm.envAddress("WBTC");
+    address public ChainlinkOracle = vm.envAddress("CHAINLINK_WBTC_ORACLE");
+    address public AaveOracle = vm.envAddress("AAVE_ORACLE");
 
     function setUp() public {
         vm.createSelectFork("https://api.securerpc.com/v1");
-        pristine = new Pristine();
+        pristine = new Pristine(WBTC, ChainlinkOracle, AaveOracle);
         satoshi = new Satoshi(address(pristine));
         pristine.initSatoshi(address(satoshi));
         receiver = new FlashloanReceiver();

@@ -23,12 +23,15 @@ contract PristineTest is Test {
     // Initial BTC balance for bob and alice.
     uint256 public constant INITIAL_BAL = 1000 * 10 ** 8;
     bytes public notOwnerError;
+    address public WBTC = vm.envAddress("WBTC");
+    address public ChainlinkOracle = vm.envAddress("CHAINLINK_WBTC_ORACLE");
+    address public AaveOracle = vm.envAddress("AAVE_ORACLE");
 
     // The setup involved creating a fork of mainnet, deploying the contracts, and
     // funding alice and bob with some BTC (1000 BTC each)
     function setUp() public {
         vm.createSelectFork("https://api.securerpc.com/v1");
-        pristine = new Pristine();
+        pristine = new Pristine(WBTC, ChainlinkOracle, AaveOracle);
         satoshi = new Satoshi(address(pristine));
         pristine.initSatoshi(address(satoshi));
         alice = vm.addr(1);
